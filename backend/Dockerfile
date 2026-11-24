@@ -11,6 +11,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /usr/local/bin/uv
 
+# The app runs from a uv-managed venv; the base image's pip (and its vendored
+# packages) is not needed at runtime, so remove it instead of shipping it.
+RUN python -m pip uninstall --yes --root-user-action=ignore pip
+
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev --no-install-project
