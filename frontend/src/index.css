@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/* Dark mode follows the system unless the user picked a theme (data-theme on <html>). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Design tokens, see the plan: indigo-violet primary, copper accent, warm off-white. */
+:root {
+  --background: #f7f6f2;
+  --surface: #ffffff;
+  --surface-muted: #efede7;
+  --border: #ddd9cf;
+  --text: #1c1b19;
+  --text-muted: #5e5a52;
+  --primary: #4b3fbf;
+  --primary-hover: #3d32a3;
+  --on-primary: #ffffff;
+  --accent: #a9501c;
+  --positive: #1b7449;
+  --negative: #c0392f;
+  --warning: #8f5e00;
+  --info: #2a64a3;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #121118;
+    --surface: #1b1a22;
+    --surface-muted: #24232d;
+    --border: #34323f;
+    --text: #edebf5;
+    --text-muted: #a6a3b5;
+    --primary: #9d94ff;
+    --primary-hover: #b3acff;
+    --on-primary: #121118;
+    --accent: #f29a62;
+    --positive: #4cc38a;
+    --negative: #f2726a;
+    --warning: #e7b44a;
+    --info: #6aa6e8;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #121118;
+  --surface: #1b1a22;
+  --surface-muted: #24232d;
+  --border: #34323f;
+  --text: #edebf5;
+  --text-muted: #a6a3b5;
+  --primary: #9d94ff;
+  --primary-hover: #b3acff;
+  --on-primary: #121118;
+  --accent: #f29a62;
+  --positive: #4cc38a;
+  --negative: #f2726a;
+  --warning: #e7b44a;
+  --info: #6aa6e8;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@layer base {
+  html {
+    font-variant-numeric: tabular-nums;
+  }
+
+  body {
+    @apply bg-background text-text antialiased;
+    min-height: 100dvh;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+}

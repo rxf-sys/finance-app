@@ -1,0 +1,18 @@
+# Local development: only the database. Run the API with uv and the frontend with pnpm,
+# see README.md.
+name: finance-app-dev
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: finance
+      POSTGRES_USER: finance
+      POSTGRES_PASSWORD: devpass
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - devdata:/var/lib/postgresql
+
+volumes:
+  devdata:
