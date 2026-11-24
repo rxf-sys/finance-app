@@ -2,7 +2,17 @@
 
 from fastapi import APIRouter, Depends, FastAPI
 
-from app.api import auth, health, household
+from app.api import (
+    accounts,
+    auth,
+    categories,
+    dashboard,
+    health,
+    household,
+    rules,
+    tags,
+    transactions,
+)
 from app.config import get_settings
 from app.deps import require_cloudflare_access
 
@@ -23,6 +33,15 @@ def create_app() -> FastAPI:
     protected = APIRouter(dependencies=[Depends(require_cloudflare_access)])
     protected.include_router(auth.router)
     protected.include_router(household.router)
+    for router in (
+        accounts.router,
+        categories.router,
+        rules.router,
+        tags.router,
+        transactions.router,
+        dashboard.router,
+    ):
+        protected.include_router(router)
     api.include_router(protected)
 
     app.include_router(api)
