@@ -4,6 +4,7 @@ python -m app.cli create-owner --email you@example.com --name "Robin" --househol
 python -m app.cli reset-totp --email you@example.com
 python -m app.cli export-openapi > openapi.json
 python -m app.cli generate-key
+python -m app.cli generate-vapid-key > secrets/fa_vapid_private_key
 """
 
 import argparse
@@ -20,6 +21,7 @@ from app.models import AuditLog, Household, HouseholdMember, HouseholdRole, User
 from app.models.base import utcnow
 from app.security.crypto import generate_key
 from app.security.passwords import MIN_PASSWORD_LENGTH, hash_password
+from app.security.webpush import VapidKey
 
 
 def _read_new_password() -> str:
@@ -100,6 +102,8 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("export-openapi", help="Print the OpenAPI schema as JSON")
     commands.add_parser("generate-key", help="Print a new FA_ENCRYPTION_KEY value")
 
+    commands.add_parser("generate-vapid-key", help="Print a new VAPID private key (PEM) for Web Push")
+
     args = parser.parse_args(argv)
     match args.command:
         case "create-owner":
@@ -110,6 +114,9 @@ def main(argv: list[str] | None = None) -> int:
             return export_openapi()
         case "generate-key":
             print(generate_key())
+            return 0
+        case "generate-vapid-key":
+            sys.stdout.write(VapidKey.generate_pem())
             return 0
     return 2
 

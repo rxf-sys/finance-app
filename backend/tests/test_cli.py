@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app import cli
 from app.models import AuditLog, Category, HouseholdRole, User
+from app.security.webpush import VapidKey
 
 
 def test_create_owner_creates_household_and_audit_entry(db: Session, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -57,3 +58,11 @@ def test_reset_totp_clears_secret_and_lock(db: Session, monkeypatch: pytest.Monk
 
     db.expire_all()
     assert user.totp_secret_encrypted is None and user.failed_login_count == 0
+
+
+def test_generate_vapid_key_prints_loadable_pem(capsys: pytest.CaptureFixture[str]) -> None:
+    assert cli.main(["generate-vapid-key"]) == 0
+
+    pem = capsys.readouterr().out
+    assert pem.startswith("-----BEGIN PRIVATE KEY-----")
+    assert len(VapidKey.from_pem(pem).public_key) == 87
