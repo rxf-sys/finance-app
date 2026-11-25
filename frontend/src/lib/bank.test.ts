@@ -8,6 +8,7 @@ import {
   formatRetryAfter,
   linkedAccountIds,
   parseRetryAfter,
+  storedErrorText,
 } from "./bank";
 
 const now = new Date("2026-11-25T12:00:00Z");
@@ -80,5 +81,18 @@ describe("helpers", () => {
       { accounts: [{ account_id: "b", name: "B", provider_account_uid: null }] },
     ] as BankConnection[];
     expect([...linkedAccountIds(connections)].sort()).toEqual(["a", "b"]);
+  });
+});
+
+describe("storedErrorText", () => {
+  it("translates the stored backend errors", () => {
+    expect(storedErrorText("Bank consent expired, please connect again")).toBe(
+      "Die Zustimmung ist abgelaufen. Bitte verbinde die Bank neu.",
+    );
+  });
+
+  it("never shows an unknown stored string as is", () => {
+    expect(storedErrorText("Something new")).toBe("Beim letzten Abruf ist ein Fehler aufgetreten.");
+    expect(storedErrorText("constructor")).toBe("Beim letzten Abruf ist ein Fehler aufgetreten.");
   });
 });

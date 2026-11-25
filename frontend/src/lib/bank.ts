@@ -21,6 +21,24 @@ export function bankErrorMessage(code: string): string {
   return Object.hasOwn(ERROR_MESSAGES, code) ? ERROR_MESSAGES[code] : UNKNOWN_ERROR;
 }
 
+/**
+ * German text for the English `last_error` / sync-run `error` strings the backend stores
+ * (constants in app/banking/sync.py and app/api/banking.py). Unknown strings get a generic text.
+ */
+const STORED_ERRORS: Record<string, string> = {
+  "The bank limits requests, will retry later":
+    "Die Bank begrenzt gerade die Abrufe. Der nächste Versuch läuft automatisch.",
+  "Bank consent expired, please connect again": "Die Zustimmung ist abgelaufen. Bitte verbinde die Bank neu.",
+  "Fetching from the bank failed": "Der Abruf bei der Bank ist fehlgeschlagen.",
+  "Authorisation was not completed": "Die Freigabe bei der Bank wurde nicht abgeschlossen.",
+  "Creating the bank session failed": "Die Verbindung zur Bank konnte nicht eingerichtet werden.",
+};
+const UNKNOWN_STORED_ERROR = "Beim letzten Abruf ist ein Fehler aufgetreten.";
+
+export function storedErrorText(message: string): string {
+  return Object.hasOwn(STORED_ERRORS, message) ? STORED_ERRORS[message] : UNKNOWN_STORED_ERROR;
+}
+
 export const STATUS_LABEL: Record<BankConnectionStatus, string> = {
   pending: "Wartet auf die Bank",
   active: "Aktiv",

@@ -26,6 +26,7 @@ import {
   formatRetryAfter,
   parseRetryAfter,
   STATUS_LABEL,
+  storedErrorText,
 } from "@/lib/bank";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { formatRelativeTime } from "@/lib/relative-time";
@@ -84,7 +85,9 @@ function SyncHistory({ connectionId }: { connectionId: string }) {
                 {run.status === "completed" ? (
                   "Erfolgreich"
                 ) : (
-                  <span className="text-negative">Fehlgeschlagen{run.error ? `: ${run.error}` : ""}</span>
+                  <span className="text-negative">
+                    Fehlgeschlagen{run.error ? `: ${storedErrorText(run.error)}` : ""}
+                  </span>
                 )}
               </td>
               <td className="py-1.5 pr-3 text-right tabular-nums">{run.rows_new}</td>
@@ -143,7 +146,7 @@ function ConnectionCard({
           </div>
         </div>
 
-        {connection.last_error && <Alert tone="error">{connection.last_error}</Alert>}
+        {connection.last_error && <Alert tone="error">{storedErrorText(connection.last_error)}</Alert>}
 
         <div>
           <p className="text-xs font-medium text-text-muted">Verbundene Konten</p>
