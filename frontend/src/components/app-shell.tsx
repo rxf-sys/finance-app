@@ -2,12 +2,14 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Ellipsis,
+  FileText,
   Landmark,
   LayoutDashboard,
   LogOut,
   type LucideIcon,
   Monitor,
   Moon,
+  PiggyBank,
   Receipt,
   ShieldCheck,
   Sun,
@@ -18,6 +20,7 @@ import {
 import { useState } from "react";
 import { api } from "@/api/client";
 import { meQuery } from "@/api/queries";
+import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
 import { applyTheme, nextTheme, readTheme, type Theme } from "@/lib/theme";
@@ -29,6 +32,8 @@ type NavItem = { to: string; label: string; icon: LucideIcon; exact?: boolean };
 const SIDEBAR_NAV: NavItem[] = [
   { to: "/", label: "Übersicht", icon: LayoutDashboard, exact: true },
   { to: "/transactions", label: "Buchungen", icon: Receipt },
+  { to: "/contracts", label: "Verträge", icon: FileText },
+  { to: "/budgets", label: "Budgets", icon: PiggyBank },
   { to: "/accounts", label: "Konten", icon: Landmark },
   { to: "/import", label: "Import", icon: Upload },
   { to: "/categories", label: "Kategorien & Regeln", icon: Tags },
@@ -40,10 +45,10 @@ const SIDEBAR_NAV: NavItem[] = [
 const TAB_NAV: NavItem[] = [
   { to: "/", label: "Übersicht", icon: LayoutDashboard, exact: true },
   { to: "/transactions", label: "Buchungen", icon: Receipt },
-  { to: "/accounts", label: "Konten", icon: Landmark },
+  { to: "/contracts", label: "Verträge", icon: FileText },
   { to: "/more", label: "Mehr", icon: Ellipsis },
 ];
-const MORE_PATHS = ["/more", "/import", "/categories", "/household", "/security"];
+const MORE_PATHS = ["/more", "/accounts", "/budgets", "/import", "/categories", "/household", "/security"];
 
 const THEME_ICON = { system: Monitor, light: Sun, dark: Moon } satisfies Record<Theme, unknown>;
 const THEME_LABEL: Record<Theme, string> = {
@@ -106,6 +111,7 @@ export function AppShell() {
               {me?.household_name} · <span className="text-text">{me?.display_name}</span>
             </p>
             <div className="flex items-center gap-1">
+              <NotificationBell />
               <Button
                 variant="ghost"
                 size="icon"

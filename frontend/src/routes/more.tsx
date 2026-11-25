@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, ShieldCheck, Tags, Upload, Users } from "lucide-react";
+import { ChevronRight, Landmark, PiggyBank, ShieldCheck, Tags, Upload, Users } from "lucide-react";
 
 const ITEMS = [
+  { to: "/accounts", label: "Konten", description: "Konten und Kontostände", icon: Landmark },
+  { to: "/budgets", label: "Budgets", description: "Monatslimits je Kategorie", icon: PiggyBank },
   { to: "/import", label: "Import", description: "Kontoauszug als CSV einlesen", icon: Upload },
   {
     to: "/categories",

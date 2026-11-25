@@ -11,7 +11,10 @@ import { AppShell } from "@/components/app-shell";
 import { currentMonthKey, isMonthKey } from "@/lib/dates";
 import { validateTransactionSearch } from "@/lib/transaction-search";
 import { AccountDetailPage, AccountsPage } from "@/routes/accounts";
+import { BudgetsPage } from "@/routes/budgets";
 import { CategoriesPage } from "@/routes/categories";
+import { ContractDetailPage } from "@/routes/contract-detail";
+import { ContractsPage } from "@/routes/contracts";
 import { DashboardPage } from "@/routes/dashboard";
 import { HouseholdPage } from "@/routes/household";
 import { ImportPage } from "@/routes/import";
@@ -85,6 +88,28 @@ const transactionsRoute = createRoute({
     return <TransactionsPage search={transactionsRoute.useSearch()} />;
   },
 });
+const contractsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/contracts",
+  component: ContractsPage,
+});
+const contractDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/contracts/$contractId",
+  component: function ContractDetailRoute() {
+    return <ContractDetailPage contractId={contractDetailRoute.useParams().contractId} />;
+  },
+});
+const budgetsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/budgets",
+  validateSearch: (raw: Record<string, unknown>): { month?: string } =>
+    isMonthKey(raw.month) ? { month: raw.month } : {},
+  component: function BudgetsRoute() {
+    const { month } = budgetsRoute.useSearch();
+    return <BudgetsPage month={month ?? currentMonthKey()} />;
+  },
+});
 const categoriesRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/categories",
@@ -119,6 +144,9 @@ const routeTree = rootRoute.addChildren([
     accountsRoute,
     accountDetailRoute,
     transactionsRoute,
+    contractsRoute,
+    contractDetailRoute,
+    budgetsRoute,
     categoriesRoute,
     importRoute,
     moreRoute,

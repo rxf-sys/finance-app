@@ -23,6 +23,18 @@ export type Transaction = Schemas["TransactionOut"];
 export type TransactionDetail = Schemas["TransactionDetail"];
 export type TransactionCreate = Schemas["TransactionCreate"];
 export type Dashboard = Schemas["DashboardOut"];
+export type Contract = Schemas["ContractOut"];
+export type ContractDetail = Schemas["ContractDetail"];
+export type ContractCreate = Schemas["ContractCreate"];
+export type ContractUpdate = Schemas["ContractUpdate"];
+export type ContractKind = Contract["kind"];
+export type ContractInterval = Contract["interval"];
+export type ContractStatus = Contract["status"];
+export type ContractSummary = Schemas["ContractSummary"];
+export type PriceChange = Schemas["PriceChangeOut"];
+export type BudgetStatus = Schemas["BudgetStatusOut"];
+export type Available = Schemas["AvailableOut"];
+export type AppNotification = Schemas["NotificationOut"];
 
 export const api = createClient<paths>({ baseUrl: "/", credentials: "same-origin" });
 
