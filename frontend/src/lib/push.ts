@@ -121,3 +121,19 @@ export async function disablePush(deps: DisableDeps): Promise<void> {
   await subscription.unsubscribe();
   await deps.unregister(endpoint);
 }
+
+export interface LogoutDeps {
+  /** Resolves to undefined when no service worker is registered (unlike `serviceWorker.ready`). */
+  getRegistration(): Promise<Pick<PushRegistration, "pushManager"> | undefined>;
+  unregister(endpoint: string): Promise<void>;
+}
+
+/** Remove this device's subscription on logout, so it stops receiving the member's notices. */
+export async function disablePushOnLogout(deps: LogoutDeps): Promise<void> {
+  const registration = await deps.getRegistration();
+  if (!registration) return;
+  await disablePush({
+    getSubscription: () => registration.pushManager.getSubscription(),
+    unregister: deps.unregister,
+  });
+}

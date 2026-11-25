@@ -22,11 +22,12 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { api } from "@/api/client";
+import { api, unwrap } from "@/api/client";
 import { meQuery } from "@/api/queries";
 import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
+import { disablePushOnLogout } from "@/lib/push";
 import { applyTheme, nextTheme, readTheme, type Theme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -98,6 +99,17 @@ export function AppShell() {
   }
 
   async function logout() {
+    if ("serviceWorker" in navigator) {
+      // Unsubscribe while the session can still unregister the endpoint. A failure must not keep the
+      // member logged in: once unsubscribe() went through, the push service rejects the endpoint and
+      // the dispatcher deletes the row on its next send.
+      await disablePushOnLogout({
+        getRegistration: () => navigator.serviceWorker.getRegistration(),
+        unregister: async (endpoint) => {
+          unwrap(await api.POST("/api/push/unsubscribe", { body: { endpoint } }));
+        },
+      }).catch(() => undefined);
+    }
     await api.POST("/api/auth/logout");
     queryClient.clear();
     await navigate({ to: "/login" });

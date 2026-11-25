@@ -4,6 +4,7 @@ import {
   base64urlToUint8Array,
   detectSupport,
   disablePush,
+  disablePushOnLogout,
   enablePush,
   PushError,
   type PushRegistration,
@@ -172,6 +173,25 @@ describe("disablePush", () => {
   it("does nothing without a subscription", async () => {
     const unregister = vi.fn();
     await disablePush({ getSubscription: async () => null, unregister });
+    expect(unregister).not.toHaveBeenCalled();
+  });
+});
+
+describe("disablePushOnLogout", () => {
+  it("removes the subscription of this device", async () => {
+    const current = subscription(KEY_BYTES, "https://fcm.googleapis.com/current");
+    const unregister = vi.fn().mockResolvedValue(undefined);
+    const pushManager = { getSubscription: async () => current, subscribe: vi.fn() };
+
+    await disablePushOnLogout({ getRegistration: async () => ({ pushManager }), unregister });
+
+    expect(current.unsubscribe).toHaveBeenCalledOnce();
+    expect(unregister).toHaveBeenCalledWith("https://fcm.googleapis.com/current");
+  });
+
+  it("does nothing without a service worker registration", async () => {
+    const unregister = vi.fn();
+    await disablePushOnLogout({ getRegistration: async () => undefined, unregister });
     expect(unregister).not.toHaveBeenCalled();
   });
 });
