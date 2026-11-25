@@ -14,6 +14,8 @@ const dateTimeFormat = new Intl.DateTimeFormat("de-DE", {
 
 /** TT.MM.JJJJ */
 export function formatDate(iso: string): string {
+  const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (day) return `${day[3]}.${day[2]}.${day[1]}`; // plain dates carry no time zone
   return dateFormat.format(new Date(iso));
 }
 

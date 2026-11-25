@@ -22,3 +22,6 @@ dist/
 .idea/
 .vscode/*
 .DS_Store
+
+# Git worktrees created by Claude Code agents
+.claude/worktrees/

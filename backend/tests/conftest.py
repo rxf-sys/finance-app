@@ -31,6 +31,7 @@ from app.main import create_app
 from app.models import Household, HouseholdMember, HouseholdRole, User
 from app.models.base import utcnow
 from app.security.passwords import hash_password
+from tests.helpers import World
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_PASSWORD = "correct horse battery"
@@ -122,3 +123,30 @@ def login(client: TestClient, email: str, password: str = DEFAULT_PASSWORD) -> d
     assert response.status_code == 200, response.text
     body: dict[str, object] = response.json()
     return body
+
+
+@pytest.fixture
+def client_for(client: TestClient) -> Callable[[str], TestClient]:
+    """Log in another user in a separate cookie jar."""
+
+    def factory(email: str) -> TestClient:
+        other = TestClient(client.app)
+        login(other, email)
+        return other
+
+    return factory
+
+
+@pytest.fixture
+def world(make_user: UserFactory, client_for: Callable[[str], TestClient]) -> World:
+    owner = make_user("owner@example.com")
+    member = make_user("member@example.com", role=HouseholdRole.MEMBER)
+    stranger = make_user("stranger@example.com", household="Nachbarn")
+    return World(
+        owner=client_for("owner@example.com"),
+        member=client_for("member@example.com"),
+        stranger=client_for("stranger@example.com"),
+        owner_user=owner,
+        member_user=member,
+        stranger_user=stranger,
+    )

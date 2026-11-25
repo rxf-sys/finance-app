@@ -15,6 +15,7 @@ import uuid
 from sqlalchemy import select
 
 from app.db import get_sessionmaker
+from app.finance.default_categories import seed_default_categories
 from app.models import AuditLog, Household, HouseholdMember, HouseholdRole, User
 from app.models.base import utcnow
 from app.security.crypto import generate_key
@@ -52,6 +53,7 @@ def create_owner(email: str, name: str, household_name: str) -> int:
         db.add_all([household, user])
         db.add(HouseholdMember(household=household, user=user, role=HouseholdRole.OWNER, joined_at=utcnow()))
         db.flush()  # the audit row references the user, so insert the user first
+        seed_default_categories(db, household.id)
         db.add(AuditLog(action="owner_created_cli", user_id=user.id, details={"email": email}))
     print(f"Created household '{household_name}' with owner {email}.")
     return 0

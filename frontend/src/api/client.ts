@@ -8,6 +8,22 @@ export type Invite = components["schemas"]["InviteOut"];
 export type InviteCreated = components["schemas"]["InviteCreated"];
 export type Passkey = components["schemas"]["Passkey"];
 
+type Schemas = components["schemas"];
+export type Account = Schemas["AccountOut"];
+export type AccountInput = Schemas["AccountCreate"];
+export type AccountKind = Account["kind"];
+export type AccountVisibility = Account["visibility"];
+export type BalancePoint = Schemas["BalancePoint"];
+export type Category = Schemas["CategoryOut"];
+export type CategoryKind = Category["kind"];
+export type Rule = Schemas["RuleOut"];
+export type RuleConditions = Schemas["RuleConditions"];
+export type Tag = Schemas["TagOut"];
+export type Transaction = Schemas["TransactionOut"];
+export type TransactionDetail = Schemas["TransactionDetail"];
+export type TransactionCreate = Schemas["TransactionCreate"];
+export type Dashboard = Schemas["DashboardOut"];
+
 export const api = createClient<paths>({ baseUrl: "/", credentials: "same-origin" });
 
 export class ApiError extends Error {
@@ -47,6 +63,16 @@ export function errorMessage(status: number): string {
     default:
       return "Etwas ist schiefgelaufen. Bitte später erneut versuchen.";
   }
+}
+
+/** German message for a failed mutation, or null while there is no error. */
+export function mutationErrorMessage(
+  error: unknown,
+  overrides: Partial<Record<number, string>> = {},
+): string | null {
+  if (!error) return null;
+  if (error instanceof ApiError) return overrides[error.status] ?? error.message;
+  return errorMessage(0);
 }
 
 export const meQueryKey = ["me"] as const;
