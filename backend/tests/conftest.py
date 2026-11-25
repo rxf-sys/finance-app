@@ -25,6 +25,7 @@ os.environ.update(
     }
 )
 
+from app import push
 from app.config import get_settings
 from app.db import get_engine, get_sessionmaker
 from app.main import create_app
@@ -58,6 +59,15 @@ def database() -> Iterator[None]:
         yield
         get_engine().dispose()
         _clear_caches()
+
+
+@pytest.fixture(autouse=True)
+def _no_push_quiet_hours(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Push dispatch pauses at night; tests must not depend on the wall clock.
+
+    Quiet-hour tests override this, and `app.push.in_quiet_hours` imported by name stays the real one.
+    """
+    monkeypatch.setattr(push, "in_quiet_hours", lambda _moment: False)
 
 
 @pytest.fixture(autouse=True)

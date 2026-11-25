@@ -8,10 +8,11 @@ import json
 import logging
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from enum import StrEnum
 from typing import Protocol
 from urllib.parse import urlsplit
+from zoneinfo import ZoneInfo
 
 import httpx
 from sqlalchemy import delete, select, update
@@ -38,6 +39,11 @@ BATCH_SIZE = 200
 # A notice that could not be pushed within a day is stale; it stays in the app only.
 MAX_PUSH_AGE = timedelta(hours=24)
 ELLIPSIS = "…"
+# No pushes at night, household time. Notices created meanwhile wait for the first run after the
+# end of the window; MAX_PUSH_AGE leaves enough room for that.
+LOCAL_TZ = ZoneInfo("Europe/Berlin")
+QUIET_START = time(22, 0)
+QUIET_END = time(7, 0)
 
 
 class Outcome(StrEnum):
@@ -179,6 +185,12 @@ def load_vapid(settings: Settings) -> VapidKey | None:
     return VapidKey.from_pem(key.get_secret_value())
 
 
+def in_quiet_hours(moment: datetime) -> bool:
+    """Whether `moment` (timezone-aware) falls into the nightly quiet hours."""
+    local = moment.astimezone(LOCAL_TZ).time()
+    return local >= QUIET_START or local < QUIET_END
+
+
 def dispatch_pending(settings: Settings | None = None, *, now: datetime | None = None) -> DeliveryResult:
     """Push every notification that has not been handled yet, each at most once.
 
@@ -193,6 +205,10 @@ def dispatch_pending(settings: Settings | None = None, *, now: datetime | None =
         vapid = load_vapid(settings)
     except ValueError:
         log.error("FA_VAPID_PRIVATE_KEY is not a valid P-256 PEM key; push is paused")
+        return DeliveryResult()
+    # Leave notices pending during quiet hours. With push disabled they are only marked handled,
+    # which needs no waiting.
+    if vapid is not None and in_quiet_hours(now):
         return DeliveryResult()
 
     total = DeliveryResult()
