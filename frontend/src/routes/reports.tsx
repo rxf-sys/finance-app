@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { shortMonthLabel } from "@/lib/dates";
+import { currentMonthKey, shortMonthLabel } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import {
   type ExportFormat,
@@ -64,13 +64,18 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 }
 
 function YearOverview({ report }: { report: YearReport }) {
-  const points = report.months.map((m) => ({
-    key: m.month,
-    label: shortMonthLabel(m.month),
-    Einnahmen: m.income_cents / 100,
-    Ausgaben: -m.expense_cents / 100,
-    Saldo: m.saldo_cents / 100,
-  }));
+  // Months still ahead have no bookings yet; leave them empty instead of plotting zeros.
+  const current = currentMonthKey();
+  const points = report.months.map((m) => {
+    const future = m.month > current;
+    return {
+      key: m.month,
+      label: shortMonthLabel(m.month),
+      Einnahmen: future ? null : m.income_cents / 100,
+      Ausgaben: future ? null : -m.expense_cents / 100,
+      Saldo: future ? null : m.saldo_cents / 100,
+    };
+  });
   return (
     <section className="space-y-3" aria-labelledby="year-overview">
       <h2 id="year-overview" className="text-lg font-semibold">
