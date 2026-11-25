@@ -9,6 +9,7 @@ import {
 import { lazy } from "react";
 import { meQuery } from "@/api/queries";
 import { AppShell } from "@/components/app-shell";
+import { validateContractSearch } from "@/lib/contracts";
 import { currentMonthKey, isMonthKey } from "@/lib/dates";
 import { parseForecastMonths } from "@/lib/forecast";
 import { validateTransactionSearch } from "@/lib/transaction-search";
@@ -106,7 +107,10 @@ const transactionsRoute = createRoute({
 const contractsRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/contracts",
-  component: ContractsPage,
+  validateSearch: validateContractSearch,
+  component: function ContractsRoute() {
+    return <ContractsPage search={contractsRoute.useSearch()} />;
+  },
 });
 const contractDetailRoute = createRoute({
   getParentRoute: () => appRoute,

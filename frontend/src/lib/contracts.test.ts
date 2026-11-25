@@ -11,6 +11,7 @@ import {
   monthlyTotal,
   noticeFromDays,
   noticeToDays,
+  validateContractSearch,
 } from "./contracts";
 
 describe("deadlineTone", () => {
@@ -103,5 +104,21 @@ describe("status transitions", () => {
     expect(canDelete({ is_manual: true, status: "confirmed" })).toBe(true);
     expect(canDelete({ is_manual: false, status: "ignored" })).toBe(true);
     expect(canDelete({ is_manual: false, status: "confirmed" })).toBe(false);
+  });
+});
+
+describe("validateContractSearch", () => {
+  it("keeps valid non-default filters", () => {
+    expect(validateContractSearch({ status: "cancelled", account: "abc" })).toEqual({
+      status: "cancelled",
+      account: "abc",
+    });
+    expect(validateContractSearch({ status: "ignored" })).toEqual({ status: "ignored" });
+  });
+  it("drops defaults and invalid values", () => {
+    expect(validateContractSearch({ status: "confirmed" })).toEqual({});
+    expect(validateContractSearch({ status: "detected", account: "  " })).toEqual({});
+    expect(validateContractSearch({ status: 3, account: 5 })).toEqual({});
+    expect(validateContractSearch({})).toEqual({});
   });
 });

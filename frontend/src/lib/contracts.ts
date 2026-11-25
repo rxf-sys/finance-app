@@ -143,3 +143,18 @@ export function canDo(action: ContractAction, status: ContractStatus): boolean {
 export function canDelete(contract: Pick<Contract, "is_manual" | "status">): boolean {
   return contract.is_manual || contract.status === "ignored";
 }
+
+/** Status tabs of the contract list ("detected" suggestions have their own section). */
+export const LIST_STATUSES = ["confirmed", "cancelled", "ignored"] as const;
+export type ListStatus = (typeof LIST_STATUSES)[number];
+
+/** Filters of the contract list in the URL; defaults (active, all accounts) are left out. */
+export type ContractSearch = { status?: Exclude<ListStatus, "confirmed">; account?: string };
+
+/** Tolerant parsing of untrusted URL input: invalid values are dropped, never thrown. */
+export function validateContractSearch(raw: Record<string, unknown>): ContractSearch {
+  const result: ContractSearch = {};
+  if (raw.status === "cancelled" || raw.status === "ignored") result.status = raw.status;
+  if (typeof raw.account === "string" && raw.account.trim() !== "") result.account = raw.account;
+  return result;
+}
