@@ -782,6 +782,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/export/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Transactions
+         * @description Visible transactions ordered by booking date; split transactions give one row per split.
+         */
+        get: operations["export_transactions_api_export_transactions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/forecast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Forecast */
+        get: operations["get_forecast_api_forecast_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -1041,6 +1078,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reports/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Category Report */
+        get: operations["category_report_api_reports_categories_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/year": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Year Report */
+        get: operations["year_report_api_reports_year_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules": {
         parameters: {
             query?: never;
@@ -1092,6 +1163,77 @@ export interface paths {
         head?: never;
         /** Update Rule */
         patch: operations["update_rule_api_rules__rule_id__patch"];
+        trace?: never;
+    };
+    "/api/savings-goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Goals */
+        get: operations["list_goals_api_savings_goals_get"];
+        put?: never;
+        /** Create Goal */
+        post: operations["create_goal_api_savings_goals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/savings-goals/{goal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Goal */
+        get: operations["get_goal_api_savings_goals__goal_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Goal */
+        delete: operations["delete_goal_api_savings_goals__goal_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Goal */
+        patch: operations["update_goal_api_savings_goals__goal_id__patch"];
+        trace?: never;
+    };
+    "/api/savings-goals/{goal_id}/contributions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Contribution */
+        post: operations["add_contribution_api_savings_goals__goal_id__contributions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/savings-goals/{goal_id}/contributions/{contribution_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Contribution */
+        delete: operations["delete_contribution_api_savings_goals__goal_id__contributions__contribution_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/tags": {
@@ -1488,6 +1630,49 @@ export interface components {
             transaction_count: number;
         };
         /**
+         * CategoryReportOut
+         * @description Per top-level category with its children; `uncategorized` has a null id and name.
+         */
+        CategoryReportOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "expense" | "income";
+            /** Rows */
+            rows: components["schemas"]["CategoryRowOut"][];
+            /** Total Cents */
+            total_cents: number;
+            /**
+             * Totals Cents
+             * @description Twelve column totals including uncategorized
+             */
+            totals_cents: number[];
+            uncategorized: components["schemas"]["CategoryRowOut"];
+            /** Year */
+            year: number;
+        };
+        /** CategoryRowOut */
+        CategoryRowOut: {
+            /** Category Id */
+            category_id: string | null;
+            /** Children */
+            children: components["schemas"]["CategoryRowOut"][];
+            /** Color */
+            color: string | null;
+            /** Icon */
+            icon: string | null;
+            /**
+             * Months Cents
+             * @description Twelve signed values, January first
+             */
+            months_cents: number[];
+            /** Name */
+            name: string | null;
+            /** Total Cents */
+            total_cents: number;
+        };
+        /**
          * CategorySource
          * @enum {string}
          */
@@ -1792,6 +1977,44 @@ export interface components {
             /** Start Date */
             start_date?: string | null;
         };
+        /** ContributionCreate */
+        ContributionCreate: {
+            /**
+             * Amount Cents
+             * @description Signed: negative is a withdrawal; never zero
+             */
+            amount_cents: number;
+            /**
+             * Booked On
+             * Format: date
+             * @description Not in the future
+             */
+            booked_on: string;
+            /** Note */
+            note?: string | null;
+        };
+        /** ContributionOut */
+        ContributionOut: {
+            /** Amount Cents */
+            amount_cents: number;
+            /**
+             * Booked On
+             * Format: date
+             */
+            booked_on: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note: string | null;
+        };
         /**
          * CsvFormat
          * @description File-level settings plus the column map.
@@ -1871,6 +2094,198 @@ export interface components {
             trend: components["schemas"]["TrendPoint"][];
             /** Uncategorized Count */
             uncategorized_count: number;
+        };
+        /** ForecastAssumptions */
+        ForecastAssumptions: {
+            /** Income Baseline Cents */
+            income_baseline_cents: number;
+            /** Income Day */
+            income_day: number | null;
+            /** Months Used */
+            months_used: number;
+            /** Variable Baseline Cents */
+            variable_baseline_cents: number;
+        };
+        /** ForecastDay */
+        ForecastDay: {
+            /** Balance Cents */
+            balance_cents: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+        };
+        /** ForecastEventOut */
+        ForecastEventOut: {
+            /** Amount Cents */
+            amount_cents: number;
+            /** Contract Id */
+            contract_id: string | null;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "contract" | "income";
+            /** Name */
+            name: string;
+        };
+        /** ForecastMonth */
+        ForecastMonth: {
+            /**
+             * Contracts Cents
+             * @description Signed sum of contract payments in the month
+             */
+            contracts_cents: number;
+            /** End Balance Cents */
+            end_balance_cents: number;
+            /** Income Cents */
+            income_cents: number;
+            /** Month */
+            month: string;
+            /**
+             * Variable Cents
+             * @description Expected variable spending, negative
+             */
+            variable_cents: number;
+        };
+        /**
+         * ForecastOut
+         * @description Projected end-of-day balances of the spendable accounts; months cover only days after today.
+         */
+        ForecastOut: {
+            /**
+             * As Of
+             * Format: date
+             */
+            as_of: string;
+            assumptions: components["schemas"]["ForecastAssumptions"];
+            /** Daily */
+            daily: components["schemas"]["ForecastDay"][];
+            /** Events */
+            events: components["schemas"]["ForecastEventOut"][];
+            /**
+             * Horizon End
+             * Format: date
+             */
+            horizon_end: string;
+            /** Insufficient History */
+            insufficient_history: boolean;
+            lowest: components["schemas"]["ForecastDay"];
+            /** Months */
+            months: components["schemas"]["ForecastMonth"][];
+            /** Start Balance Cents */
+            start_balance_cents: number;
+        };
+        /** GoalCreate */
+        GoalCreate: {
+            /**
+             * Account Id
+             * @description Progress follows this account's balance; it must be visible to you
+             */
+            account_id?: string | null;
+            /** Color */
+            color?: string | null;
+            /** Icon */
+            icon?: string | null;
+            /** Name */
+            name: string;
+            /** Note */
+            note?: string | null;
+            /** Target Cents */
+            target_cents: number;
+            /**
+             * Target Date
+             * @description Must be in the future
+             */
+            target_date?: string | null;
+            /** @default shared */
+            visibility: components["schemas"]["AccountVisibility"];
+        };
+        /**
+         * GoalOut
+         * @description A savings goal with computed progress.
+         *
+         *     `contributions` is only filled by the detail, create, patch and contribution endpoints
+         *     (oldest first); the list endpoint returns it empty.
+         */
+        GoalOut: {
+            /** Account Id */
+            account_id: string | null;
+            /** Account Name */
+            account_name: string | null;
+            /** Achieved */
+            achieved: boolean;
+            /** Archived */
+            archived: boolean;
+            /** Archived At */
+            archived_at: string | null;
+            /** Color */
+            color: string | null;
+            /** Contributions */
+            contributions: components["schemas"]["ContributionOut"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Icon */
+            icon: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Monthly Needed Cents */
+            monthly_needed_cents: number | null;
+            /** Name */
+            name: string;
+            /** Note */
+            note: string | null;
+            /** Owner User Id */
+            owner_user_id: string | null;
+            /**
+             * Percent
+             * @description 0 and up; may exceed 100
+             */
+            percent: number;
+            /** Progress Cents */
+            progress_cents: number;
+            /** Remaining Cents */
+            remaining_cents: number;
+            /** Target Cents */
+            target_cents: number;
+            /** Target Date */
+            target_date: string | null;
+            visibility: components["schemas"]["AccountVisibility"];
+        };
+        /**
+         * GoalUpdate
+         * @description Only the fields that are sent change; an explicit null clears the optional ones.
+         */
+        GoalUpdate: {
+            /** Account Id */
+            account_id?: string | null;
+            /** Archived */
+            archived?: boolean | null;
+            /** Color */
+            color?: string | null;
+            /** Icon */
+            icon?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Target Cents */
+            target_cents?: number | null;
+            /** Target Date */
+            target_date?: string | null;
+            visibility?: components["schemas"]["AccountVisibility"] | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2110,6 +2525,25 @@ export interface components {
              * Format: uuid
              */
             user_id: string;
+        };
+        /** MonthOut */
+        MonthOut: {
+            /**
+             * Expense Cents
+             * @description Negative
+             */
+            expense_cents: number;
+            /** Income Cents */
+            income_cents: number;
+            /** Month */
+            month: string;
+            /** Saldo Cents */
+            saldo_cents: number;
+            /**
+             * Savings Rate Bp
+             * @description Saldo / income in basis points; null without income
+             */
+            savings_rate_bp: number | null;
         };
         NameOrNames: string | string[];
         /** NewAccount */
@@ -2818,6 +3252,24 @@ export interface components {
             options: {
                 [key: string]: unknown;
             };
+        };
+        /** YearReportOut */
+        YearReportOut: {
+            /**
+             * Expense Cents
+             * @description Negative
+             */
+            expense_cents: number;
+            /** Income Cents */
+            income_cents: number;
+            /** Months */
+            months: components["schemas"]["MonthOut"][];
+            /** Saldo Cents */
+            saldo_cents: number;
+            /** Savings Rate Bp */
+            savings_rate_bp: number | null;
+            /** Year */
+            year: number;
         };
     };
     responses: never;
@@ -4626,6 +5078,73 @@ export interface operations {
             };
         };
     };
+    export_transactions_api_export_transactions_get: {
+        parameters: {
+            query?: {
+                format?: "csv" | "xlsx";
+                from?: string | null;
+                to?: string | null;
+                account_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_forecast_api_forecast_get: {
+        parameters: {
+            query?: {
+                months?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_health_get: {
         parameters: {
             query?: never;
@@ -5239,6 +5758,73 @@ export interface operations {
             };
         };
     };
+    category_report_api_reports_categories_get: {
+        parameters: {
+            query: {
+                year: number;
+                kind?: "expense" | "income";
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryReportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    year_report_api_reports_year_get: {
+        parameters: {
+            query: {
+                year: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["YearReportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_rules_api_rules_get: {
         parameters: {
             query?: never;
@@ -5391,6 +5977,246 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RuleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_goals_api_savings_goals_get: {
+        parameters: {
+            query?: {
+                include_archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_goal_api_savings_goals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_goal_api_savings_goals__goal_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_goal_api_savings_goals__goal_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_goal_api_savings_goals__goal_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_contribution_api_savings_goals__goal_id__contributions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContributionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_contribution_api_savings_goals__goal_id__contributions__contribution_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+                contribution_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalOut"];
                 };
             };
             /** @description Validation Error */
