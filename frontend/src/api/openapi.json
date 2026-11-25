@@ -4230,6 +4230,54 @@
         "title": "ProviderAccountOut",
         "type": "object"
       },
+      "PushConfig": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "public_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Key"
+          }
+        },
+        "required": [
+          "enabled",
+          "public_key"
+        ],
+        "title": "PushConfig",
+        "type": "object"
+      },
+      "PushTestResult": {
+        "properties": {
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "removed": {
+            "title": "Removed",
+            "type": "integer"
+          },
+          "sent": {
+            "title": "Sent",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sent",
+          "failed",
+          "removed"
+        ],
+        "title": "PushTestResult",
+        "type": "object"
+      },
       "ReadAllResult": {
         "properties": {
           "updated": {
@@ -4617,6 +4665,59 @@
           "note"
         ],
         "title": "SplitOut",
+        "type": "object"
+      },
+      "SubscriptionIn": {
+        "description": "Shaped like the browser's `PushSubscription.toJSON()`.",
+        "properties": {
+          "endpoint": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "expirationTime": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expirationtime"
+          },
+          "keys": {
+            "$ref": "#/components/schemas/SubscriptionKeys"
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ],
+        "title": "SubscriptionIn",
+        "type": "object"
+      },
+      "SubscriptionKeys": {
+        "properties": {
+          "auth": {
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Auth",
+            "type": "string"
+          },
+          "p256dh": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "P256Dh",
+            "type": "string"
+          }
+        },
+        "required": [
+          "p256dh",
+          "auth"
+        ],
+        "title": "SubscriptionKeys",
         "type": "object"
       },
       "SyncQueued": {
@@ -5753,6 +5854,21 @@
           "count"
         ],
         "title": "UnreadCount",
+        "type": "object"
+      },
+      "UnsubscribeIn": {
+        "properties": {
+          "endpoint": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Endpoint",
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpoint"
+        ],
+        "title": "UnsubscribeIn",
         "type": "object"
       },
       "ValidationError": {
@@ -10198,6 +10314,224 @@
         "summary": "Mark Read",
         "tags": [
           "notifications"
+        ]
+      }
+    },
+    "/api/push/config": {
+      "get": {
+        "operationId": "get_config_api_push_config_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushConfig"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Config",
+        "tags": [
+          "push"
+        ]
+      }
+    },
+    "/api/push/subscriptions": {
+      "post": {
+        "operationId": "subscribe_api_push_subscriptions_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "user-agent",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User-Agent"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Subscribe",
+        "tags": [
+          "push"
+        ]
+      }
+    },
+    "/api/push/test": {
+      "post": {
+        "operationId": "send_test_api_push_test_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushTestResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send Test",
+        "tags": [
+          "push"
+        ]
+      }
+    },
+    "/api/push/unsubscribe": {
+      "post": {
+        "operationId": "unsubscribe_api_push_unsubscribe_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnsubscribeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unsubscribe",
+        "tags": [
+          "push"
         ]
       }
     },

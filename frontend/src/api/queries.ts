@@ -23,6 +23,12 @@ export const passkeysQuery = queryOptions({
   queryFn: async () => unwrap(await api.GET("/api/auth/passkeys")),
 });
 
+export const pushConfigQuery = queryOptions({
+  queryKey: ["push", "config"],
+  queryFn: async () => unwrap(await api.GET("/api/push/config")),
+  staleTime: 5 * 60_000,
+});
+
 export const accountsQuery = queryOptions({
   queryKey: ["accounts"],
   queryFn: async () => unwrap(await api.GET("/api/accounts")),
