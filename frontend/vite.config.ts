@@ -64,8 +64,8 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        // A push handler would go into a separate script loaded here:
-        // importScripts: ["push-sw.js"],
+        // Web Push handlers (public/push-sw.js) run inside the generated service worker.
+        importScripts: ["push-sw.js"],
       },
     }),
   ],
