@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.deps import MemberContext
 from app.finance.access import visible_transaction_clause
 from app.finance.normalize import normalize_iban, normalize_text
-from app.models import CategoryRule, CategorySource, RuleSource, Transaction
+from app.models import Account, AccountVisibility, CategoryRule, CategorySource, RuleSource, Transaction
 
 _MAX_CENTS = 10**13
 
@@ -142,7 +142,10 @@ def apply_rules(db: Session, household_id: uuid.UUID, transactions: Iterable[Tra
 def learn_from_correction(
     db: Session, member: MemberContext, tx: Transaction, category_id: uuid.UUID
 ) -> CategoryRule | None:
-    """Remember a manual categorization as a learned rule keyed on IBAN, else on counterparty name."""
+    """Remember a manual categorization as a learned rule keyed on IBAN, else on counterparty name.
+
+    On a private account the rule is limited to that account.
+    """
     conditions: dict[str, Any] | None = None
     if tx.counterparty_iban:
         try:
@@ -155,6 +158,11 @@ def learn_from_correction(
             conditions = {"counterparty_contains": name}
     if conditions is None:
         return None
+    account = db.get(Account, tx.account_id)
+    if account is not None and account.visibility is AccountVisibility.PRIVATE:
+        # A rule learned on a private account stays on it: it would otherwise show that account's
+        # counterparties to the household and categorize their bookings.
+        conditions["account_id"] = str(account.id)
 
     household_id = member.household.id
     for rule, cond in load_rules(db, household_id):

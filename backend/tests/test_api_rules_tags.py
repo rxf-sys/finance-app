@@ -110,6 +110,36 @@ def test_rule_account_condition_requires_a_visible_account(world: World, db: Ses
     )
 
 
+def test_rules_on_private_accounts_are_hidden_from_other_members(world: World, db: Session) -> None:
+    food = _category(world.owner)
+    private = make_account(db, world.owner_user, "Privat", AccountVisibility.PRIVATE)
+    hidden = _rule(world.owner, food, account_id=str(private.id), counterparty_contains="praxis")
+    shared = _rule(world.owner, food, counterparty_contains="rewe")
+
+    assert [r["id"] for r in world.member.get(RULES).json()] == [shared["id"]]
+    assert {r["id"] for r in world.owner.get(RULES).json()} == {hidden["id"], shared["id"]}
+    url = f"{RULES}/{hidden['id']}"
+    assert world.member.patch(url, json={"is_active": False}).status_code == 404
+    assert world.member.delete(url).status_code == 404
+    assert world.owner.patch(url, json={"is_active": False}).status_code == 200
+
+
+def test_rule_learned_on_a_private_account_stays_on_it(world: World, db: Session) -> None:
+    health = _category(world.owner, "Gesundheit")
+    private = make_account(db, world.owner_user, "Privat", AccountVisibility.PRIVATE)
+    shared = make_account(db, world.owner_user, "Gemeinsam")
+    tx = make_tx(db, private, -8000, counterparty_name="Praxis Dr. Beispiel")
+    lookalike = make_tx(db, shared, -8000, counterparty_name="Praxis Dr. Beispiel")
+    response = world.owner.patch(f"/api/transactions/{tx.id}", json={"category_id": health, "learn": True})
+    assert response.status_code == 200, response.text
+
+    learned = [r for r in world.owner.get(RULES).json() if r["source"] == "learned"]
+    assert [r["conditions"].get("account_id") for r in learned] == [str(private.id)]
+    assert world.member.get(RULES).json() == []
+    db.expire_all()
+    assert db.get(Transaction, lookalike.id).category_id is None  # type: ignore[union-attr]
+
+
 def test_apply_rules_updates_visible_non_manual_transactions(world: World, db: Session) -> None:
     food = _category(world.owner)
     fun = _category(world.owner, "Freizeit")
@@ -183,6 +213,18 @@ def test_tag_validation_and_conflicts(world: World) -> None:
     assert world.member.post(TAGS, json={"name": "Urlaub"}).status_code == 409
     assert world.owner.patch(f"{TAGS}/{second['id']}", json={"name": "Urlaub"}).status_code == 409
     assert world.owner.patch(f"{TAGS}/{first['id']}", json={"name": "Urlaub"}).status_code == 200  # unchanged
+
+
+def test_tag_names_are_unique_ignoring_case(world: World) -> None:
+    first = world.owner.post(TAGS, json={"name": "Urlaub"}).json()
+    second = world.owner.post(TAGS, json={"name": "Auto"}).json()
+
+    assert world.owner.post(TAGS, json={"name": "urlaub"}).status_code == 409
+    assert world.member.post(TAGS, json={"name": "URLAUB"}).status_code == 409
+    assert world.owner.patch(f"{TAGS}/{second['id']}", json={"name": "uRLAUB"}).status_code == 409
+    renamed = world.owner.patch(f"{TAGS}/{first['id']}", json={"name": "urlaub"})  # only the case changes
+    assert renamed.status_code == 200 and renamed.json()["name"] == "urlaub"
+    assert world.owner.post(TAGS, json={"name": "Urlaub"}).status_code == 409
 
 
 def test_deleting_a_tag_detaches_it_from_transactions(world: World, db: Session) -> None:

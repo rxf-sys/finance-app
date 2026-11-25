@@ -21,7 +21,7 @@ function VisibilityBadge({ account }: { account: Account }) {
   return <Badge>{VISIBILITY_LABEL[account.visibility]}</Badge>;
 }
 
-function AccountRow({ account, bankSync }: { account: Account; bankSync?: { lastSyncAt: string | null } }) {
+function AccountRow({ account, lastSyncAt }: { account: Account; lastSyncAt?: string | null }) {
   const Icon = ACCOUNT_KIND_ICON[account.kind];
   return (
     <li className={`flex items-center gap-2 px-3 py-3 sm:px-4 ${account.is_archived ? "opacity-70" : ""}`}>
@@ -38,12 +38,12 @@ function AccountRow({ account, bankSync }: { account: Account; bankSync?: { last
             <span className="truncate text-sm font-medium">{account.name}</span>
             <VisibilityBadge account={account} />
             {account.is_archived && <Badge>Archiviert</Badge>}
-            {bankSync && <Badge>Bankabruf</Badge>}
+            {account.bank_linked && <Badge>Bankabruf</Badge>}
           </span>
           <span className="block truncate text-xs text-text-muted">
             {ACCOUNT_KIND_LABEL[account.kind]}
             {account.iban ? ` · ${formatIban(account.iban)}` : ""}
-            {bankSync?.lastSyncAt ? ` · Abruf ${formatRelativeTime(bankSync.lastSyncAt)}` : ""}
+            {account.bank_linked && lastSyncAt ? ` · Abruf ${formatRelativeTime(lastSyncAt)}` : ""}
           </span>
         </span>
         <span className="text-right text-sm font-medium tabular-nums">
@@ -66,9 +66,10 @@ export function AccountsPage() {
   const { data: accounts } = useSuspenseQuery(accountsQuery);
   const [creating, setCreating] = useState(false);
   const { data: bank } = useQuery(bankConnectionsQuery);
-  const bankSync = new Map(
+  // Connections are private to their creator, so the last sync is only known for own links.
+  const lastSyncAt = new Map(
     (bank?.configured ? bank.connections : []).flatMap((c) =>
-      c.accounts.map((a) => [a.account_id, { lastSyncAt: c.last_sync_at }] as const),
+      c.accounts.map((a) => [a.account_id, c.last_sync_at] as const),
     ),
   );
   const active = accounts.filter((a) => !a.is_archived);
@@ -94,7 +95,7 @@ export function AccountsPage() {
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
           {[...active, ...archived].map((account) => (
-            <AccountRow key={account.id} account={account} bankSync={bankSync.get(account.id)} />
+            <AccountRow key={account.id} account={account} lastSyncAt={lastSyncAt.get(account.id)} />
           ))}
         </ul>
       )}

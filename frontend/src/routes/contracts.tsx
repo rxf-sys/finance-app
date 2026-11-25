@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tansta
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Check, FileSearch, Lightbulb, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { api, type Contract, type ContractStatus, unwrap } from "@/api/client";
+import { api, type Contract, unwrap } from "@/api/client";
 import { contractSummaryQuery, contractsQuery, invalidateContracts } from "@/api/planning-queries";
 import { accountsQuery } from "@/api/queries";
 import { Amount } from "@/components/amount";
@@ -14,14 +14,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
-import { CONTRACT_INTERVAL_LABEL, CONTRACT_STATUS_LABEL, kindBreakdown, kindIcon } from "@/lib/contracts";
+import {
+  CONTRACT_INTERVAL_LABEL,
+  CONTRACT_STATUS_LABEL,
+  type ContractSearch,
+  kindBreakdown,
+  kindIcon,
+  LIST_STATUSES,
+  type ListStatus,
+} from "@/lib/contracts";
 import { formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
 import { useContractAction } from "@/lib/use-contract-action";
 import { cn } from "@/lib/utils";
 
-type ListStatus = Exclude<ContractStatus, "detected">;
-const STATUS_TABS: ListStatus[] = ["confirmed", "cancelled", "ignored"];
 const ALL_ACCOUNTS = "all";
 
 function SummaryCard() {
@@ -169,12 +175,12 @@ function ContractRow({ contract }: { contract: Contract }) {
   );
 }
 
-export function ContractsPage() {
+export function ContractsPage({ search }: { search: ContractSearch }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const toast = useToast();
-  const [status, setStatus] = useState<ListStatus>("confirmed");
-  const [account, setAccount] = useState(ALL_ACCOUNTS);
+  const status: ListStatus = search.status ?? "confirmed";
+  const account = search.account ?? ALL_ACCOUNTS;
   const [creating, setCreating] = useState(false);
   const [detectResult, setDetectResult] = useState<number | null>(null);
   const accountId = account === ALL_ACCOUNTS ? undefined : account;
@@ -190,6 +196,13 @@ export function ContractsPage() {
     },
     onError: () => toast.show("Die Suche hat nicht geklappt. Bitte später erneut versuchen.", "error"),
   });
+
+  function setFilter(patch: ContractSearch) {
+    void navigate({
+      to: "/contracts",
+      search: (previous: ContractSearch) => ({ ...previous, ...patch }),
+    });
+  }
 
   const accountOptions = [
     { value: ALL_ACCOUNTS, label: "Alle Konten" },
@@ -233,12 +246,12 @@ export function ContractsPage() {
           <div className="flex flex-wrap items-center gap-2">
             <fieldset className="m-0 flex min-w-0 rounded-lg border border-border bg-surface p-0.5">
               <legend className="sr-only">Status</legend>
-              {STATUS_TABS.map((value) => (
+              {LIST_STATUSES.map((value) => (
                 <button
                   key={value}
                   type="button"
                   aria-pressed={status === value}
-                  onClick={() => setStatus(value)}
+                  onClick={() => setFilter({ status: value === "confirmed" ? undefined : value })}
                   className={cn(
                     "rounded-md px-3 py-1.5 text-sm text-text-muted",
                     status === value && "bg-surface-muted font-medium text-text",
@@ -252,7 +265,7 @@ export function ContractsPage() {
               aria-label="Konto filtern"
               className="h-9 w-44"
               value={account}
-              onValueChange={setAccount}
+              onValueChange={(value) => setFilter({ account: value === ALL_ACCOUNTS ? undefined : value })}
               options={accountOptions}
             />
           </div>

@@ -56,6 +56,22 @@ def test_duplicate_names_conflict_per_level(world: World) -> None:
     assert world.owner.get(BASE).status_code == 200
 
 
+def test_category_names_are_unique_ignoring_case(world: World) -> None:
+    top = _create(world.owner, "Lebensmittel", kind="expense")
+    other = _create(world.owner, "Freizeit", kind="expense")
+    child = _create(world.owner, "Café", parent_id=top["id"])
+
+    assert world.owner.post(BASE, json={"name": "lebensmittel", "kind": "expense"}).status_code == 409
+    assert world.owner.post(BASE, json={"name": "CAFÉ", "parent_id": top["id"]}).status_code == 409
+    assert world.owner.post(BASE, json={"name": "STRASSE", "kind": "expense"}).status_code == 201
+    assert world.owner.post(BASE, json={"name": "straße", "kind": "expense"}).status_code == 409
+    _create(world.owner, "café", parent_id=other["id"])  # another parent is fine
+    assert world.owner.patch(f"{BASE}/{other['id']}", json={"name": "LEBENSMITTEL"}).status_code == 409
+    assert world.owner.patch(f"{BASE}/{child['id']}", json={"name": "café"}).status_code == 200  # own name
+    renamed = world.owner.patch(f"{BASE}/{other['id']}", json={"name": "freizeit"})
+    assert renamed.status_code == 200 and renamed.json()["name"] == "freizeit"
+
+
 def test_update_category_and_kind_propagates_to_children(world: World) -> None:
     top = _create(world.owner, "Einnahmen", kind="expense")
     child = _create(world.owner, "Gehalt", parent_id=top["id"])

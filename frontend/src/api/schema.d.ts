@@ -1389,6 +1389,8 @@ export interface components {
         AccountOut: {
             /** Balance Cents */
             balance_cents: number;
+            /** Bank Linked */
+            bank_linked: boolean;
             /** Currency */
             currency: string;
             /** Iban */

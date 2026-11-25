@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { type FormEvent, useState } from "react";
-import { bankConnectionsQuery, invalidateBank, providerAccountsQuery } from "@/api/bank-queries";
+import { invalidateBank, providerAccountsQuery } from "@/api/bank-queries";
 import { type AccountKind, type AccountVisibility, api, mutationErrorMessage, unwrap } from "@/api/client";
 import { accountsQuery, invalidateLedger } from "@/api/queries";
 import { FormField } from "@/components/form-field";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ACCOUNT_KIND_LABEL } from "@/lib/accounts";
-import { type BankConnection, linkedAccountIds, type ProviderAccount } from "@/lib/bank";
+import type { BankConnection, ProviderAccount } from "@/lib/bank";
 import { toIsoDate } from "@/lib/dates";
 import { formatDate } from "@/lib/format";
 
@@ -41,9 +41,7 @@ function ProviderAccountForm({
 }) {
   const queryClient = useQueryClient();
   const { data: accounts = [] } = useQuery(accountsQuery);
-  const { data: bank } = useQuery(bankConnectionsQuery);
-  const taken = linkedAccountIds(bank?.configured ? bank.connections : []);
-  const candidates = accounts.filter((a) => !a.is_archived && !taken.has(a.id));
+  const candidates = accounts.filter((a) => !a.is_archived && !a.bank_linked);
 
   const [mode, setMode] = useState<Mode>("new");
   const [name, setName] = useState(provider.name || connection.aspsp_name);

@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 from app.finance.contracts import (
     add_months_clamped,
     cancellation_deadline,
+    cancellation_letter_text,
     detect_contracts,
+    earliest_end_date,
     match_payments,
 )
 from app.models import (
@@ -238,3 +240,33 @@ def test_cancellation_deadline_skips_deadlines_in_the_past() -> None:
     assert cancellation_deadline(_contract(date(2026, 7, 10), 30), today) == today
     # A long-gone term catches up month by month.
     assert cancellation_deadline(_contract(date(2024, 1, 15), 7), today) == date(2026, 7, 8)
+
+
+def test_earliest_end_date() -> None:
+    today = date(2026, 6, 10)
+    assert earliest_end_date(_contract(None, 30), today) is None
+    assert earliest_end_date(_contract(date(2026, 12, 31), None), today) is None
+    assert earliest_end_date(_contract(date(2026, 12, 31), 30), today) == date(2026, 12, 31)
+    # Deadline of the 20 Jun term passed on 21 May: the next term ends 20 Jul.
+    assert earliest_end_date(_contract(date(2026, 6, 20), 30), today) == date(2026, 7, 20)
+    # Deadline exactly today is still open, so that term end counts.
+    assert earliest_end_date(_contract(date(2026, 7, 10), 30), today) == date(2026, 7, 10)
+    # Month-end clamping after the minimum term: 31 Jan renews to 30 Jun.
+    assert earliest_end_date(_contract(date(2026, 1, 31), 14), today) == date(2026, 6, 30)
+
+
+def test_cancellation_letter_text() -> None:
+    subject, body = cancellation_letter_text(
+        contract_name="Streamo", customer_number=None, sender="Anna", end_date=None
+    )
+    assert subject == "Kündigung meines Vertrags"
+    assert "Kundennummer" not in body and "Nach meiner Berechnung" not in body
+    assert "zum nächstmöglichen Zeitpunkt.\n\n" in body
+
+    subject, body = cancellation_letter_text(
+        contract_name="Streamo", customer_number="4711", sender="Anna", end_date=date(2026, 7, 5)
+    )
+    assert subject == "Kündigung meines Vertrags (Kundennummer 4711)"
+    assert "Kundennummer: 4711\n\n" in body
+    assert "zum nächstmöglichen Zeitpunkt. Nach meiner Berechnung ist das der 05.07.2026." in body
+    assert body.endswith("Mit freundlichen Grüßen\nAnna")
