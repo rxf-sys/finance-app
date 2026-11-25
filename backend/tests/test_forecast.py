@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.finance import reporting
 from app.finance.contracts import today_berlin
 from app.finance.forecast import ContractSpec, HistoryLine, compute_forecast, median_int
-from app.models import AccountVisibility, ContractInterval
+from app.models import AccountVisibility, ContractInterval, ContractStatus
 from tests.helpers import World, make_account, make_contract, make_tx
 
 FORECAST = "/api/forecast"
@@ -242,6 +242,20 @@ def test_forecast_api_ignores_contract_linked_and_transfers_in_baselines(world: 
     body = world.owner.get(FORECAST).json()
     assert body["assumptions"]["variable_baseline_cents"] == 20_000
     assert body["assumptions"]["income_baseline_cents"] == 300_000
+
+
+def test_forecast_api_keeps_payments_of_unconfirmed_contracts_in_baseline(world: World, db: Session) -> None:
+    account = make_account(db, world.owner_user)
+    _seed_history(db, account)
+    suggestion = make_contract(db, account.household_id, account=account, status=ContractStatus.DETECTED)
+    today = today_berlin()
+    for n in (1, 2, 3):
+        payment = make_tx(db, account, -999, reporting.add_months(today.replace(day=1), -n).replace(day=10))
+        payment.contract_id = suggestion.id
+    db.commit()
+    body = world.owner.get(FORECAST).json()
+    assert body["assumptions"]["variable_baseline_cents"] == 20_000 + 999
+    assert all(e["kind"] != "contract" for e in body["events"])
 
 
 def test_forecast_api_private_accounts_and_contracts_of_others_do_not_count(

@@ -20,7 +20,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from app.deps import MemberContext
@@ -46,7 +46,7 @@ class ContractSpec:
 
 @dataclass(frozen=True)
 class HistoryLine:
-    """A counted line: not a transfer, not linked to a contract."""
+    """A counted line: not a transfer, not a payment of a projected (confirmed) contract."""
 
     booking_date: date
     amount_cents: int
@@ -179,7 +179,7 @@ def _baseline_flows(
             if include and month == this_month:
                 include = received * 100 < income_baseline * INCOME_RECEIVED_SHARE_PCT
             if include:
-                income.append(ForecastEvent(when, "income", "Income", income_baseline, None))
+                income.append(ForecastEvent(when, "income", "Erwartete Einnahmen", income_baseline, None))
         if variable_baseline > 0:
             if month == this_month:
                 total = max(0, variable_baseline - spent)
@@ -289,6 +289,9 @@ def load_forecast(db: Session, member: MemberContext, today: date, months: int) 
         ContractSpec(c.id, c.name, c.interval, c.expected_amount_cents, c.next_due_date)
         for c in contract_rows
     ]
+    # Payments of contracts that are projected as events are left out of the baselines. Payments
+    # linked to unconfirmed suggestions (or cancelled/ignored contracts) stay in, else they vanish.
+    projected = [c.id for c in contracts]
 
     first = reporting.add_months(today.replace(day=1), -HISTORY_MONTHS)
     lines = reporting.effective_lines(member, first, today + timedelta(days=1))
@@ -298,7 +301,7 @@ def load_forecast(db: Session, member: MemberContext, today: date, months: int) 
         .select_from(lines.outerjoin(category, category.id == lines.c.category_id))
         .where(
             lines.c.account_id.in_(account_ids),
-            lines.c.contract_id.is_(None),
+            or_(lines.c.contract_id.is_(None), lines.c.contract_id.not_in(projected)),
             ~reporting.is_transfer(lines, category),
         )
     )
