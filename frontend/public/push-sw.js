@@ -30,9 +30,11 @@ self.addEventListener("push", (event) => {
   );
 });
 
-// Only same-origin paths: "/x" is fine, "//evil.example" and "https://..." are not.
+// Only same-origin paths. Resolving the URL catches "//evil.example", "/\evil.example" and absolute URLs.
 function safeUrl(value) {
-  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : "/";
+  if (typeof value !== "string" || !value.startsWith("/")) return "/";
+  const resolved = new URL(value, self.location.origin);
+  return resolved.origin === self.location.origin ? resolved.pathname + resolved.search + resolved.hash : "/";
 }
 
 self.addEventListener("notificationclick", (event) => {
@@ -44,8 +46,9 @@ self.addEventListener("notificationclick", (event) => {
       for (const client of windows) {
         if (new URL(client.url).origin === self.location.origin) {
           await client.focus();
-          if ("navigate" in client) await client.navigate(url);
-          return;
+          // navigate() only works on windows this worker controls; open a new one otherwise.
+          if ("navigate" in client && (await client.navigate(url).then(Boolean, () => false))) return;
+          break;
         }
       }
       await self.clients.openWindow(url);

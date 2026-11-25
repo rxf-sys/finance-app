@@ -133,9 +133,8 @@ export function PushCard() {
   const config = useQuery({ ...pushConfigQuery, enabled: supported });
 
   const refresh = async () => setDevice(await readDevice());
-  // biome-ignore lint/correctness/useExhaustiveDependencies: read the device once on mount
   useEffect(() => {
-    void refresh();
+    void readDevice().then(setDevice);
   }, []);
 
   const toggle = useMutation({
