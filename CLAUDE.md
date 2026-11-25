@@ -9,7 +9,7 @@ Deployed with Docker Compose on a Proxmox VM, reachable through Cloudflare Tunne
 - `backend/` – Python 3.13, FastAPI, SQLAlchemy 2 (sync), Alembic, Procrastinate (job queue in Postgres)
   - `app/api/` routers, `app/models/` ORM models, `app/security/` crypto, TOTP, Cloudflare Access
   - `app/sessions.py` server-side sessions (cookie `fa_session`), `app/deps.py` auth dependencies
-  - `app/finance/` ledger logic: `access.py` (visibility of accounts, transactions and contracts, the only place that decides it), rules, transfers, dedupe, reporting, importer, contracts (detection and payment matching), budgets, available-to-spend, notifications
+  - `app/finance/` ledger logic: `access.py` (visibility of accounts, transactions and contracts, the only place that decides it), rules, transfers, dedupe, reporting, importer, contracts (detection and payment matching), budgets, available-to-spend, forecast, savings goals, export (CSV/XLSX), year reports, notifications
   - `app/importing/` pure CSV parsing (presets, header auto-mapping), no database access
   - `app/banking/` Enable Banking client, response mapping and the sync that feeds new rows through the same pipeline as a CSV import
   - `app/worker.py` background tasks, `app/cli.py` admin commands
