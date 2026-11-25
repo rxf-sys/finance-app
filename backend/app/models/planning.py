@@ -157,6 +157,8 @@ class BankConnection(UUIDPrimaryKey, CreatedAt, Base):
     consent_valid_until: Mapped[datetime | None]
     last_sync_at: Mapped[datetime | None]
     last_error: Mapped[str | None] = mapped_column(Text)
+    # Throttles manual syncs.
+    manual_sync_requested_at: Mapped[datetime | None]
 
 
 class SyncRun(UUIDPrimaryKey, Base):

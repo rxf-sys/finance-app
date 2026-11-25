@@ -16,7 +16,7 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api import banking_schemas as schemas
@@ -24,18 +24,16 @@ from app.api.common import conflict_on_duplicate
 from app.banking.client import BankAuthExpired, BankError, BankRateLimited, EnableBankingClient
 from app.banking.mapping import account_iban
 from app.banking.queue import enqueue_sync
-from app.banking.sync import SESSION_CONTEXT, SYNC_START_MARKER, decrypt_session_id, marker_started_at
+from app.banking.sync import SESSION_CONTEXT, decrypt_session_id
 from app.config import Settings
 from app.deps import CurrentMember, DbDep, MemberContext, SettingsDep
 from app.finance.access import get_visible_account
 from app.models import (
     Account,
-    AuditLog,
     BankConnection,
     BankConnectionStatus,
     BankProvider,
     SyncRun,
-    SyncStatus,
     Transaction,
 )
 from app.models.base import utcnow
@@ -438,20 +436,7 @@ def link_account(
     sync_from = body.sync_from or (
         last_booking + timedelta(days=1) if last_booking else today - timedelta(days=DEFAULT_HISTORY_DAYS)
     )
-    now = utcnow()
-    # The start date is kept as a marker run (see app.banking.sync) so no model change is needed.
-    db.add(
-        SyncRun(
-            id=uuid.uuid4(),
-            household_id=connection.household_id,
-            bank_connection_id=connection.id,
-            account_id=account.id,
-            status=SyncStatus.COMPLETED,
-            started_at=marker_started_at(sync_from),
-            finished_at=now,
-            error=SYNC_START_MARKER,
-        )
-    )
+    account.sync_from = sync_from
     connection.last_sync_at = None  # due at the next hourly run
     audit(
         db, request, settings, "bank_account_linked", member.user,
@@ -481,20 +466,16 @@ def request_sync(
     if connection is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Bank connection not found")
     _active(connection)
-    recent = db.scalar(
-        select(func.max(AuditLog.at)).where(
-            AuditLog.action == "bank_sync_requested",
-            AuditLog.details["connection_id"].as_string() == str(connection.id),
-            AuditLog.at > utcnow() - MANUAL_SYNC_INTERVAL,
-        )
-    )
-    if recent is not None:
-        wait = max(int((recent + MANUAL_SYNC_INTERVAL - utcnow()).total_seconds()), 1)
+    now = utcnow()
+    recent = connection.manual_sync_requested_at
+    if recent is not None and recent > now - MANUAL_SYNC_INTERVAL:
+        wait = max(int((recent + MANUAL_SYNC_INTERVAL - now).total_seconds()), 1)
         raise HTTPException(
             status.HTTP_429_TOO_MANY_REQUESTS,
             "A sync was requested recently",
             headers={"Retry-After": str(wait)},
         )
+    connection.manual_sync_requested_at = now
     audit(db, request, settings, "bank_sync_requested", member.user, connection_id=str(connection.id))
     db.flush()
     try:
@@ -534,10 +515,7 @@ def list_sync_runs(connection_id: uuid.UUID, member: CurrentMember, db: DbDep) -
     connection = _get_connection(db, member, connection_id)
     runs = db.scalars(
         select(SyncRun)
-        .where(
-            SyncRun.bank_connection_id == connection.id,
-            or_(SyncRun.error.is_(None), SyncRun.error != SYNC_START_MARKER),
-        )
+        .where(SyncRun.bank_connection_id == connection.id)
         .order_by(SyncRun.started_at.desc())
         .limit(20)
     ).all()

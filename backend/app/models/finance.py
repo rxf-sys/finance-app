@@ -86,6 +86,8 @@ class Account(UUIDPrimaryKey, CreatedAt, Base):
         ForeignKey("bank_connections.id", ondelete="SET NULL"), index=True
     )
     provider_account_uid: Mapped[str | None] = mapped_column(String(100))
+    # First day to fetch from the bank, chosen when linking; used until a sync has completed.
+    sync_from: Mapped[date | None]
 
 
 class Category(UUIDPrimaryKey, CreatedAt, Base):

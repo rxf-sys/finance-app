@@ -556,7 +556,7 @@ def test_list_connections_and_sync_runs(
     ]
     assert "session" not in json.dumps(listed)
     runs = world.owner.get(f"/api/bank-connections/{connection_id}/sync-runs").json()
-    assert [r["rows_new"] for r in runs] == [1]  # the start marker is not listed
+    assert [r["rows_new"] for r in runs] == [1]
 
 
 def test_delete_unlinks_but_keeps_data(world: World, bank: FakeBank, db: Session, settings: Settings) -> None:

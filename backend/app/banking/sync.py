@@ -2,17 +2,16 @@
 
 Log lines and stored errors are static: provider bodies and transaction contents never appear.
 
-Where a sync starts, per account (no model changes needed):
+Where a sync starts, per account:
 - after a completed run: that run's start minus an overlap of 7 days;
-- before the first run: the marker SyncRun written by the link endpoint (`SYNC_START_MARKER`),
-  whose `started_at` is the chosen `sync_from` date; without a marker, 90 days back.
+- before the first run: `Account.sync_from` (set when linking), else 90 days back.
 """
 
 import logging
 import uuid
 from collections import Counter
 from collections.abc import Iterable, Sequence
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any, Literal
 
 from sqlalchemy import func, select
@@ -43,7 +42,6 @@ log = logging.getLogger(__name__)
 Outcome = Literal["ok", "failed", "stop"]
 
 SESSION_CONTEXT = b"bank_session"
-SYNC_START_MARKER = "sync_start"
 OVERLAP = timedelta(days=7)
 DEFAULT_HISTORY = timedelta(days=90)
 SYNC_INTERVAL = timedelta(hours=6)
@@ -72,11 +70,9 @@ def _start_date(db: Session, account: Account, today: date) -> date:
         .order_by(SyncRun.started_at.desc())
         .limit(1)
     )
-    if run is None:
-        return today - DEFAULT_HISTORY
-    if run.error == SYNC_START_MARKER:
-        return run.started_at.date()
-    return (run.started_at - OVERLAP).date()
+    if run is not None:
+        return (run.started_at - OVERLAP).date()
+    return account.sync_from or today - DEFAULT_HISTORY
 
 
 def _hashes(account: Account, rows: Sequence[MappedTransaction]) -> list[str]:
@@ -323,7 +319,3 @@ def sync_due_connections(
             continue
         done += 1
     return done
-
-
-def marker_started_at(sync_from: date) -> datetime:
-    return datetime.combine(sync_from, time.min, tzinfo=UTC)

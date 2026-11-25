@@ -33,6 +33,7 @@ def upgrade() -> None:
     sa.Column('consent_valid_until', sa.DateTime(timezone=True), nullable=True),
     sa.Column('last_sync_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('last_error', sa.Text(), nullable=True),
+    sa.Column('manual_sync_requested_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['household_id'], ['households.id'], name=op.f('fk_bank_connections_household_id_households'), ondelete='CASCADE'),
@@ -138,6 +139,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_contract_price_changes_contract_id'), 'contract_price_changes', ['contract_id'], unique=False)
     op.add_column('accounts', sa.Column('bank_connection_id', sa.Uuid(), nullable=True))
     op.add_column('accounts', sa.Column('provider_account_uid', sa.String(length=100), nullable=True))
+    op.add_column('accounts', sa.Column('sync_from', sa.Date(), nullable=True))
     op.create_index(op.f('ix_accounts_bank_connection_id'), 'accounts', ['bank_connection_id'], unique=False)
     op.create_unique_constraint(op.f('uq_accounts_bank_connection_id_provider_account_uid'), 'accounts', ['bank_connection_id', 'provider_account_uid'])
     op.create_foreign_key(op.f('fk_accounts_bank_connection_id_bank_connections'), 'accounts', 'bank_connections', ['bank_connection_id'], ['id'], ondelete='SET NULL')
@@ -156,6 +158,7 @@ def downgrade() -> None:
     op.drop_constraint(op.f('fk_accounts_bank_connection_id_bank_connections'), 'accounts', type_='foreignkey')
     op.drop_constraint(op.f('uq_accounts_bank_connection_id_provider_account_uid'), 'accounts', type_='unique')
     op.drop_index(op.f('ix_accounts_bank_connection_id'), table_name='accounts')
+    op.drop_column('accounts', 'sync_from')
     op.drop_column('accounts', 'provider_account_uid')
     op.drop_column('accounts', 'bank_connection_id')
     op.drop_index(op.f('ix_contract_price_changes_contract_id'), table_name='contract_price_changes')
