@@ -6,28 +6,38 @@ import {
   Outlet,
   redirect,
 } from "@tanstack/react-router";
+import { lazy } from "react";
 import { meQuery } from "@/api/queries";
 import { AppShell } from "@/components/app-shell";
 import { currentMonthKey, isMonthKey } from "@/lib/dates";
 import { parseForecastMonths } from "@/lib/forecast";
 import { validateTransactionSearch } from "@/lib/transaction-search";
-import { AccountDetailPage, AccountsPage } from "@/routes/accounts";
-import { BankPage } from "@/routes/bank";
-import { BudgetsPage } from "@/routes/budgets";
-import { CategoriesPage } from "@/routes/categories";
-import { ContractDetailPage } from "@/routes/contract-detail";
-import { ContractsPage } from "@/routes/contracts";
-import { DashboardPage } from "@/routes/dashboard";
-import { ForecastPage } from "@/routes/forecast";
-import { GoalsPage } from "@/routes/goals";
-import { HouseholdPage } from "@/routes/household";
-import { ImportPage } from "@/routes/import";
 import { InvitePage } from "@/routes/invite";
 import { LoginPage } from "@/routes/login";
-import { MorePage } from "@/routes/more";
-import { ReportsPage } from "@/routes/reports";
-import { SecurityPage } from "@/routes/security";
-import { TransactionsPage } from "@/routes/transactions";
+
+// Pages load on demand (React.lazy; the router wraps matches in Suspense) so the entry chunk stays small (recharts lives in the lazy chunks only).
+const AccountDetailPage = lazy(() =>
+  import("@/routes/accounts").then((m) => ({ default: m.AccountDetailPage })),
+);
+const AccountsPage = lazy(() => import("@/routes/accounts").then((m) => ({ default: m.AccountsPage })));
+const BankPage = lazy(() => import("@/routes/bank").then((m) => ({ default: m.BankPage })));
+const BudgetsPage = lazy(() => import("@/routes/budgets").then((m) => ({ default: m.BudgetsPage })));
+const CategoriesPage = lazy(() => import("@/routes/categories").then((m) => ({ default: m.CategoriesPage })));
+const ContractDetailPage = lazy(() =>
+  import("@/routes/contract-detail").then((m) => ({ default: m.ContractDetailPage })),
+);
+const ContractsPage = lazy(() => import("@/routes/contracts").then((m) => ({ default: m.ContractsPage })));
+const DashboardPage = lazy(() => import("@/routes/dashboard").then((m) => ({ default: m.DashboardPage })));
+const ForecastPage = lazy(() => import("@/routes/forecast").then((m) => ({ default: m.ForecastPage })));
+const GoalsPage = lazy(() => import("@/routes/goals").then((m) => ({ default: m.GoalsPage })));
+const HouseholdPage = lazy(() => import("@/routes/household").then((m) => ({ default: m.HouseholdPage })));
+const ImportPage = lazy(() => import("@/routes/import").then((m) => ({ default: m.ImportPage })));
+const MorePage = lazy(() => import("@/routes/more").then((m) => ({ default: m.MorePage })));
+const ReportsPage = lazy(() => import("@/routes/reports").then((m) => ({ default: m.ReportsPage })));
+const SecurityPage = lazy(() => import("@/routes/security").then((m) => ({ default: m.SecurityPage })));
+const TransactionsPage = lazy(() =>
+  import("@/routes/transactions").then((m) => ({ default: m.TransactionsPage })),
+);
 
 type RouterContext = { queryClient: QueryClient };
 
