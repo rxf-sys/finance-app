@@ -1,9 +1,15 @@
 """Builders for finance tests."""
 
+import hashlib
+import hmac
+import struct
 import uuid
 from dataclasses import dataclass
 from datetime import date
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -158,3 +164,31 @@ def make_contract(
     db.add(contract)
     db.commit()
     return contract
+
+
+def raw_public(private_key: ec.EllipticCurvePrivateKey) -> bytes:
+    return private_key.public_key().public_bytes(
+        serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint
+    )
+
+
+def decrypt_push(body: bytes, ua_private: ec.EllipticCurvePrivateKey, auth_secret: bytes) -> bytes:
+    """Receiver side of RFC 8291, written independently of `encrypt` to check the round trip."""
+    salt, record_size, key_len = body[:16], *struct.unpack("!IB", body[16:21])
+    assert record_size == 4096
+    as_public = body[21 : 21 + key_len]
+    ciphertext = body[21 + key_len :]
+    ua_public = raw_public(ua_private)
+    sender = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), as_public)
+    ecdh = ua_private.exchange(ec.ECDH(), sender)
+
+    def h(key: bytes, data: bytes) -> bytes:
+        return hmac.new(key, data, hashlib.sha256).digest()
+
+    ikm = h(h(auth_secret, ecdh), b"WebPush: info\x00" + ua_public + as_public + b"\x01")
+    prk = h(salt, ikm)
+    cek = h(prk, b"Content-Encoding: aes128gcm\x00\x01")[:16]
+    nonce = h(prk, b"Content-Encoding: nonce\x00\x01")[:12]
+    padded = AESGCM(cek).decrypt(nonce, ciphertext, None)
+    assert padded.endswith(b"\x02")
+    return padded[:-1]

@@ -1,12 +1,6 @@
-import hashlib
-import hmac
-import struct
-
 import jwt
 import pytest
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from app.security.webpush import (
     MAX_PLAINTEXT,
@@ -17,6 +11,8 @@ from app.security.webpush import (
     validate_endpoint,
     validate_subscription_keys,
 )
+from tests.helpers import decrypt_push as _decrypt
+from tests.helpers import raw_public as _raw_public
 
 # RFC 8291, section 5 and appendix A.
 RFC_PLAINTEXT = b"When I grow up, I want to be a watermelon"
@@ -36,34 +32,6 @@ ENDPOINT = "https://fcm.googleapis.com/fcm/send/abc123"
 
 def _private_key(raw_b64url: str) -> ec.EllipticCurvePrivateKey:
     return ec.derive_private_key(int.from_bytes(b64url_decode(raw_b64url)), ec.SECP256R1())
-
-
-def _raw_public(private_key: ec.EllipticCurvePrivateKey) -> bytes:
-    return private_key.public_key().public_bytes(
-        serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint
-    )
-
-
-def _decrypt(body: bytes, ua_private: ec.EllipticCurvePrivateKey, auth_secret: bytes) -> bytes:
-    """Receiver side of RFC 8291, written independently of `encrypt` to check the round trip."""
-    salt, record_size, key_len = body[:16], *struct.unpack("!IB", body[16:21])
-    assert record_size == 4096
-    as_public = body[21 : 21 + key_len]
-    ciphertext = body[21 + key_len :]
-    ua_public = _raw_public(ua_private)
-    sender = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), as_public)
-    ecdh = ua_private.exchange(ec.ECDH(), sender)
-
-    def h(key: bytes, data: bytes) -> bytes:
-        return hmac.new(key, data, hashlib.sha256).digest()
-
-    ikm = h(h(auth_secret, ecdh), b"WebPush: info\x00" + ua_public + as_public + b"\x01")
-    prk = h(salt, ikm)
-    cek = h(prk, b"Content-Encoding: aes128gcm\x00\x01")[:16]
-    nonce = h(prk, b"Content-Encoding: nonce\x00\x01")[:12]
-    padded = AESGCM(cek).decrypt(nonce, ciphertext, None)
-    assert padded.endswith(b"\x02")
-    return padded[:-1]
 
 
 def test_encrypt_matches_rfc_8291_example() -> None:
