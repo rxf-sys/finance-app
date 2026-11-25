@@ -17,6 +17,7 @@ from app.finance.contracts import detect_contracts, today_berlin
 from app.finance.notifications import generate_notifications
 from app.models import AuthChallenge, BankConnection, Household, Invite, UserSession
 from app.models.base import utcnow
+from app.push import dispatch_pending
 
 app = procrastinate.App(connector=procrastinate.PsycopgConnector(conninfo=get_settings().psycopg_conninfo))
 
@@ -56,6 +57,15 @@ def generate_notifications_daily(timestamp: int) -> None:
     """Create deadline, budget and consent notices; safe to rerun thanks to dedupe keys."""
     with get_sessionmaker().begin() as db:
         generate_notifications(db, today_berlin())
+    # Only after the commit: the dispatcher reads the new notices in its own transaction.
+    dispatch_pending()
+
+
+@app.periodic(cron="*/2 * * * *")
+@app.task(queueing_lock="dispatch_push")
+def dispatch_push(timestamp: int) -> None:
+    """Every 2 minutes: push notifications created since the last run (also by bank syncs)."""
+    dispatch_pending()
 
 
 log = logging.getLogger(__name__)

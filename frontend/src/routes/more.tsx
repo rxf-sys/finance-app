@@ -28,7 +28,12 @@ const ITEMS = [
     icon: Tags,
   },
   { to: "/household", label: "Haushalt", description: "Mitglieder und Einladungen", icon: Users },
-  { to: "/security", label: "Sicherheit", description: "Passkeys und Zwei-Faktor-Code", icon: ShieldCheck },
+  {
+    to: "/security",
+    label: "Sicherheit",
+    description: "Passkeys, Zwei-Faktor-Code und Push",
+    icon: ShieldCheck,
+  },
 ] as const;
 
 export function MorePage() {

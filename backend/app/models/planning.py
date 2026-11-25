@@ -204,6 +204,24 @@ class Notification(UUIDPrimaryKey, CreatedAt, Base):
     link: Mapped[str | None] = mapped_column(String(200))  # in-app path, e.g. "/contracts/<id>"
     dedupe_key: Mapped[str] = mapped_column(String(200))
     read_at: Mapped[datetime | None]
+    # Set when the push dispatcher dealt with this notice (sent or deliberately skipped).
+    push_handled_at: Mapped[datetime | None]
+
+
+class PushSubscription(UUIDPrimaryKey, CreatedAt, Base):
+    """A browser's Web Push subscription. The endpoint is a secret only that browser knows."""
+
+    __tablename__ = "push_subscriptions"
+
+    household_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("households.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    endpoint: Mapped[str] = mapped_column(Text, unique=True)
+    p256dh: Mapped[str] = mapped_column(String(100))
+    auth: Mapped[str] = mapped_column(String(30))
+    user_agent: Mapped[str | None] = mapped_column(String(200))
+    last_success_at: Mapped[datetime | None]
 
 
 class SavingsGoal(UUIDPrimaryKey, CreatedAt, Base):

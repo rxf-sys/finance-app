@@ -12,6 +12,7 @@ Deployed with Docker Compose on a Proxmox VM, reachable through Cloudflare Tunne
   - `app/finance/` ledger logic: `access.py` (visibility of accounts, transactions, contracts and savings goals, the only place that decides it), rules, transfers, dedupe, reporting, importer, contracts (detection and payment matching), budgets, available-to-spend, forecast, savings goals, export (CSV/XLSX), year reports, notifications
   - `app/importing/` pure CSV parsing (presets, header auto-mapping), no database access
   - `app/banking/` Enable Banking client, response mapping and the sync that feeds new rows through the same pipeline as a CSV import
+  - `app/push.py` Web Push sending and the notification dispatcher (outbox via `notifications.push_handled_at`); `app/security/webpush.py` RFC 8291 encryption, VAPID, endpoint allowlist
   - `app/worker.py` background tasks, `app/cli.py` admin commands
 - `frontend/` – React 19, Vite, TypeScript, TanStack Router + Query, Tailwind CSS 4, shadcn-style components
   - `src/api/schema.d.ts` is generated from the backend OpenAPI schema; never edit by hand

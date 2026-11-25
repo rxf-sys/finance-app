@@ -1078,6 +1078,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/push/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Config */
+        get: operations["get_config_api_push_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/push/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subscribe */
+        post: operations["subscribe_api_push_subscriptions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/push/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send Test */
+        post: operations["send_test_api_push_test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/push/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unsubscribe */
+        post: operations["unsubscribe_api_push_unsubscribe_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/reports/categories": {
         parameters: {
             query?: never;
@@ -2770,6 +2838,22 @@ export interface components {
             /** Uid */
             uid: string;
         };
+        /** PushConfig */
+        PushConfig: {
+            /** Enabled */
+            enabled: boolean;
+            /** Public Key */
+            public_key: string | null;
+        };
+        /** PushTestResult */
+        PushTestResult: {
+            /** Failed */
+            failed: number;
+            /** Removed */
+            removed: number;
+            /** Sent */
+            sent: number;
+        };
         /** ReadAllResult */
         ReadAllResult: {
             /** Updated */
@@ -2896,6 +2980,24 @@ export interface components {
             note: string | null;
             /** Position */
             position: number;
+        };
+        /**
+         * SubscriptionIn
+         * @description Shaped like the browser's `PushSubscription.toJSON()`.
+         */
+        SubscriptionIn: {
+            /** Endpoint */
+            endpoint: string;
+            /** Expirationtime */
+            expirationTime?: number | null;
+            keys: components["schemas"]["SubscriptionKeys"];
+        };
+        /** SubscriptionKeys */
+        SubscriptionKeys: {
+            /** Auth */
+            auth: string;
+            /** P256Dh */
+            p256dh: string;
         };
         /** SyncQueued */
         SyncQueued: {
@@ -3241,6 +3343,11 @@ export interface components {
         UnreadCount: {
             /** Count */
             count: number;
+        };
+        /** UnsubscribeIn */
+        UnsubscribeIn: {
+            /** Endpoint */
+            endpoint: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -5760,6 +5867,136 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["NotificationOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_config_api_push_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushConfig"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    subscribe_api_push_subscriptions_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "user-agent"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_test_api_push_test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushTestResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unsubscribe_api_push_unsubscribe_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UnsubscribeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

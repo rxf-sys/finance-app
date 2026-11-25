@@ -129,6 +129,57 @@ Der Worker ruft deshalb stündlich nur Verbindungen ab, deren letzter Abruf mehr
 Meldet die Bank ein Limit (429), versucht der Worker es später erneut. Die Freigabe läuft je nach Bank nach
 höchstens 90 bis 180 Tagen ab; dann erscheint eine Benachrichtigung und die Verbindung muss erneuert werden.
 
+## Push-Benachrichtigungen einrichten
+
+Optional. Ohne diese Einrichtung zeigt die Karte *Push-Benachrichtigungen* unter *Sicherheit* „auf dem Server nicht
+eingerichtet“, `/api/push/subscriptions` und `/api/push/test` antworten mit 503 „Push is not configured“.
+Die Benachrichtigungen in der App funktionieren unverändert.
+
+1. VAPID-Schlüssel erzeugen und als Secret ablegen (die Datei nicht committen, `secrets/` ist ignoriert):
+
+   ```sh
+   docker compose run --rm api python -m app.cli generate-vapid-key > secrets/fa_vapid_private_key
+   chmod 644 secrets/fa_vapid_private_key
+   ```
+
+2. In `compose.yaml` ergänzen (api und worker brauchen das Secret; die api liefert den öffentlichen Schlüssel an
+   die Browser, der worker versendet die Nachrichten):
+
+   ```yaml
+   x-app-env: &app-env
+     # ... bestehende Einträge ...
+     FA_VAPID_SUBJECT: ${FA_VAPID_SUBJECT:-}   # optional
+
+   x-app-secrets: &app-secrets
+     - fa_db_password
+     - fa_encryption_key
+     - fa_vapid_private_key
+
+   secrets:
+     fa_vapid_private_key:
+       file: ./secrets/fa_vapid_private_key
+   ```
+
+   `FA_VAPID_SUBJECT` ist die Kontaktadresse für die Push-Dienste der Browser (`mailto:du@example.com` oder
+   `https://...`). Ohne Angabe gilt `FA_PUBLIC_ORIGIN`, sofern es mit `https://` beginnt. Danach
+   `docker compose up -d`.
+3. In der App unter *Sicherheit* bei *Push-Benachrichtigungen* den Schalter *Auf diesem Gerät* einschalten und die
+   Berechtigung des Browsers erteilen. Jedes Gerät und jeder Browser schaltet sich selbst ein.
+4. Prüfen: *Test senden* drücken. Es erscheint „Testbenachrichtigung“ auf dem Gerät. Bleibt sie aus, meldet die
+   Karte, ob der Push-Dienst die Nachricht abgelehnt hat oder das Gerät dort nicht mehr bekannt war (es wird dann
+   entfernt und muss neu eingeschaltet werden).
+
+**Neuer Schlüssel:** Abos sind an den öffentlichen Schlüssel gebunden. Wird `fa_vapid_private_key` ausgetauscht,
+werden alle bestehenden Geräte-Abos ungültig; jedes Gerät muss den Schalter aus- und wieder einschalten
+(die App ersetzt dabei das alte Abo). Den Schlüssel deshalb wie die anderen Secrets sichern.
+
+**iPhone und iPad:** Push funktioniert dort nur in der installierten App. In Safari über *Teilen* →
+*Zum Home-Bildschirm* hinzufügen und die App von dort öffnen; im normalen Safari-Tab ist der Schalter gesperrt.
+
+**Versand:** Der worker prüft alle 2 Minuten auf neue Hinweise und schickt sie an die Geräte des jeweiligen
+Mitglieds. Hinweise, die älter als 24 Stunden sind, werden nicht mehr gepusht. Im Log stehen bei Fehlern nur
+Statuscode und Push-Dienst, nie Inhalte.
+
 ## Updates
 
 ```sh
