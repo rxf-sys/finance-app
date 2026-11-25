@@ -4,10 +4,10 @@ import uuid
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, field_validator
 
 from app.api.finance_schemas import Cents
-from app.models import ContractInterval, ContractKind, ContractStatus, NotificationKind
+from app.models import AccountVisibility, ContractInterval, ContractKind, ContractStatus, NotificationKind
 
 ContractName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
 ShortText = Annotated[str, StringConstraints(strip_whitespace=True, max_length=100)]
@@ -187,6 +187,92 @@ class UnreadCount(BaseModel):
 
 class ReadAllResult(BaseModel):
     updated: int
+
+
+# ---------------------------------------------------------------- savings goals
+
+GoalName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+GoalIcon = Annotated[str, StringConstraints(pattern=r"^[a-z0-9-]+$", max_length=40)]
+GoalColor = Annotated[str, StringConstraints(pattern=r"^[a-z0-9-]+$", max_length=20)]
+ContributionNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length=200)]
+TargetCents = Annotated[int, Field(gt=0, le=10**13)]
+
+
+class GoalCreate(BaseModel):
+    name: GoalName
+    target_cents: TargetCents
+    target_date: date | None = Field(default=None, description="Must be in the future")
+    account_id: uuid.UUID | None = Field(
+        default=None, description="Progress follows this account's balance; it must be visible to you"
+    )
+    visibility: AccountVisibility = AccountVisibility.SHARED
+    icon: GoalIcon | None = None
+    color: GoalColor | None = None
+    note: LongText | None = None
+
+
+class GoalUpdate(BaseModel):
+    """Only the fields that are sent change; an explicit null clears the optional ones."""
+
+    name: GoalName | None = None
+    target_cents: TargetCents | None = None
+    target_date: date | None = None
+    account_id: uuid.UUID | None = None
+    visibility: AccountVisibility | None = None
+    icon: GoalIcon | None = None
+    color: GoalColor | None = None
+    note: LongText | None = None
+    archived: bool | None = None
+
+
+class ContributionCreate(BaseModel):
+    amount_cents: Cents = Field(description="Signed: negative is a withdrawal; never zero")
+    booked_on: date = Field(description="Not in the future")
+    note: ContributionNote | None = None
+
+    @field_validator("amount_cents")
+    @classmethod
+    def _non_zero(cls, value: int) -> int:
+        if value == 0:
+            raise ValueError("amount_cents must not be zero")
+        return value
+
+
+class ContributionOut(BaseModel):
+    id: uuid.UUID
+    amount_cents: int
+    booked_on: date
+    note: str | None
+    created_at: datetime
+
+
+class GoalOut(BaseModel):
+    """A savings goal with computed progress.
+
+    `contributions` is only filled by the detail, create, patch and contribution endpoints
+    (oldest first); the list endpoint returns it empty.
+    """
+
+    id: uuid.UUID
+    name: str
+    target_cents: int
+    target_date: date | None
+    account_id: uuid.UUID | None
+    account_name: str | None
+    visibility: AccountVisibility
+    owner_user_id: uuid.UUID | None
+    icon: str | None
+    color: str | None
+    note: str | None
+    archived: bool
+    archived_at: datetime | None
+    created_at: datetime
+    progress_cents: int
+    percent: int = Field(description="0 and up; may exceed 100")
+    remaining_cents: int
+    monthly_needed_cents: int | None
+    achieved: bool
+    contributions: list[ContributionOut]
 
 
 # ---------------------------------------------------------------- forecast

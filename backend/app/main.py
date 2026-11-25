@@ -17,6 +17,7 @@ from app.api import (
     imports,
     notifications,
     rules,
+    savings_goals,
     tags,
     transactions,
 )
@@ -52,6 +53,7 @@ def create_app() -> FastAPI:
         budgets.router,
         available.router,
         forecast.router,
+        savings_goals.router,
         notifications.router,
         banking.router,
     ):
