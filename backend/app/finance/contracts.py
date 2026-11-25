@@ -32,7 +32,6 @@ from app.models import (
 )
 
 BERLIN = ZoneInfo("Europe/Berlin")
-MANUAL_PREFIX = "manual:"
 
 # Nominal length in days and accepted median spacing (nominal +- tolerance) per interval.
 NOMINAL_DAYS = {
@@ -85,23 +84,23 @@ def interval_matches(days: float, interval: ContractInterval) -> bool:
 
 
 def cancellation_deadline(contract: Contract, today: date | None = None) -> date | None:
-    """Last day to give notice: the end of the minimum term minus the notice period.
+    """The next cancellation deadline that is not in the past: term end minus the notice period.
 
-    Assumption: once `min_term_end` has passed, the contract renews month by month (the German
-    default after the minimum term, section 309 no. 9 BGB), so the next term end is the first date
-    after `today` reached by stepping from `min_term_end` in whole months (day of month preserved,
-    clamped). The deadline may then already lie in the past if the notice period is longer than the
-    time left in that month.
+    Assumption: after the minimum term the contract renews month by month (the German default,
+    section 309 no. 9 BGB), so the term ends repeat every month from `min_term_end` (day of month
+    preserved, clamped). If the deadline of the current term has already passed, the deadline of
+    the following term is returned. A deadline falling on `today` still counts.
     """
     if contract.min_term_end is None or contract.notice_period_days is None:
         return None
     today = today or today_berlin()
-    term_end = contract.min_term_end
+    notice = timedelta(days=contract.notice_period_days)
     steps = 0
-    while term_end < today:
+    deadline = contract.min_term_end - notice
+    while deadline < today:
         steps += 1
-        term_end = add_months_clamped(contract.min_term_end, steps)
-    return term_end - timedelta(days=contract.notice_period_days)
+        deadline = add_months_clamped(contract.min_term_end, steps) - notice
+    return deadline
 
 
 # ---------------------------------------------------------------- keys
@@ -111,15 +110,6 @@ def transaction_key(tx: Transaction) -> str:
     if tx.counterparty_iban:
         return tx.counterparty_iban
     return normalize_text(tx.counterparty_name) if tx.counterparty_name else ""
-
-
-def contract_match_key(contract: Contract) -> str:
-    """The key payments are compared with; manual contracts carry a marker prefix."""
-    return contract.counterparty_key.removeprefix(MANUAL_PREFIX)
-
-
-def is_manual(contract: Contract) -> bool:
-    return contract.counterparty_key.startswith(MANUAL_PREFIX)
 
 
 # ---------------------------------------------------------------- detection
@@ -203,7 +193,7 @@ def detect_contracts(
         return []
 
     existing = {
-        (c.account_id, contract_match_key(c))
+        (c.account_id, c.counterparty_key)
         for c in db.scalars(select(Contract).where(Contract.household_id == household_id))
     }
     categories = {c.id: c for c in db.scalars(select(Category).where(Category.household_id == household_id))}
@@ -305,7 +295,7 @@ def match_payments(db: Session, household_id: uuid.UUID, transactions: Iterable[
         )
         .order_by(Contract.created_at, Contract.id)
     ):
-        contracts.setdefault((contract.account_id, contract_match_key(contract)), contract)
+        contracts.setdefault((contract.account_id, contract.counterparty_key), contract)
 
     linked = 0
     for tx in candidates:

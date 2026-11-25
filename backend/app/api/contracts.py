@@ -21,11 +21,9 @@ from app.finance.access import (
     visible_transaction_clause,
 )
 from app.finance.contracts import (
-    MANUAL_PREFIX,
     add_interval,
     cancellation_deadline,
     detect_contracts,
-    is_manual,
 )
 from app.finance.normalize import normalize_iban, normalize_text
 from app.models import (
@@ -100,7 +98,7 @@ def _out_one(contract: Contract, count: int) -> schemas.ContractOut:
         cancellation_deadline=cancellation_deadline(contract),
         customer_number=contract.customer_number,
         note=contract.note,
-        is_manual=is_manual(contract),
+        is_manual=contract.is_manual,
         confirmed_at=contract.confirmed_at,
         cancelled_at=contract.cancelled_at,
         created_at=contract.created_at,
@@ -225,7 +223,8 @@ def create_contract(
         name=body.name,
         kind=body.kind,
         status=ContractStatus.CONFIRMED,
-        counterparty_key=(MANUAL_PREFIX + key)[:200],
+        counterparty_key=key[:200],
+        is_manual=True,
         counterparty_iban=iban,
         interval=body.interval,
         expected_amount_cents=body.expected_amount_cents,
@@ -297,7 +296,7 @@ def delete_contract(
     contract_id: uuid.UUID, request: Request, member: CurrentMember, db: DbDep, settings: SettingsDep
 ) -> None:
     contract = get_visible_contract(db, member, contract_id)
-    if not (is_manual(contract) or contract.status is ContractStatus.IGNORED):
+    if not (contract.is_manual or contract.status is ContractStatus.IGNORED):
         raise HTTPException(
             status.HTTP_409_CONFLICT, "Only manual or ignored contracts can be deleted; cancel or ignore it"
         )

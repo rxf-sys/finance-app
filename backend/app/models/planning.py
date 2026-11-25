@@ -95,6 +95,7 @@ class Contract(UUIDPrimaryKey, CreatedAt, Base):
     note: Mapped[str | None] = mapped_column(Text)
     confirmed_at: Mapped[datetime | None]
     cancelled_at: Mapped[datetime | None]
+    is_manual: Mapped[bool] = mapped_column(default=False)  # created by hand, not by detection
 
     account: Mapped[Account | None] = relationship()
     category: Mapped[Category | None] = relationship()

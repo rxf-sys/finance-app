@@ -11,7 +11,7 @@ from app.deps import MemberContext
 from app.finance import reporting
 from app.finance.access import visible_contract_clause
 from app.finance.contracts import add_interval
-from app.models import AccountKind, Contract, ContractInterval, ContractStatus
+from app.models import Account, AccountKind, Contract, ContractInterval, ContractStatus
 
 SPENDABLE_KINDS = {AccountKind.GIRO, AccountKind.CASH}
 
@@ -46,7 +46,10 @@ def available_to_spend(db: Session, member: MemberContext, today: date) -> Avail
     last_day = end_of_month(today)
     contracts = db.scalars(
         select(Contract)
+        .outerjoin(Account, Account.id == Contract.account_id)
         .where(
+            # Only what is paid from the accounts counted in the balance, or from no known account.
+            Account.id.is_(None) | Account.kind.in_(SPENDABLE_KINDS),
             visible_contract_clause(member),
             Contract.status == ContractStatus.CONFIRMED,
             Contract.next_due_date > today,

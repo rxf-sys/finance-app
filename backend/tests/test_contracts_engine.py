@@ -226,3 +226,15 @@ def test_cancellation_deadline_renews_monthly_after_minimum_term() -> None:
     assert cancellation_deadline(_contract(date(2026, 1, 31), 14), date(2026, 6, 10)) == date(2026, 6, 16)
     # Stepping starts from the original date, so the 31st is kept where the month has one.
     assert cancellation_deadline(_contract(date(2026, 1, 31), 0), date(2026, 7, 1)) == date(2026, 7, 31)
+
+
+def test_cancellation_deadline_skips_deadlines_in_the_past() -> None:
+    today = date(2026, 6, 10)
+    # Term ends 20 Jun but the 30-day notice ended 21 May: take the next term (20 Jul -> 20 Jun).
+    assert cancellation_deadline(_contract(date(2026, 6, 20), 30), today) == date(2026, 6, 20)
+    # Minimum term not over yet, yet its deadline passed: the monthly renewal applies as well.
+    assert cancellation_deadline(_contract(date(2026, 6, 30), 30), today) == date(2026, 6, 30)
+    # Deadline exactly today is still open.
+    assert cancellation_deadline(_contract(date(2026, 7, 10), 30), today) == today
+    # A long-gone term catches up month by month.
+    assert cancellation_deadline(_contract(date(2024, 1, 15), 7), today) == date(2026, 7, 8)

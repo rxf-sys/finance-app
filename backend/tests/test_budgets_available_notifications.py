@@ -178,6 +178,23 @@ def test_available_to_spend_with_weekly_contract(world: World, db: Session) -> N
     ]  # fmt: skip
 
 
+def test_available_ignores_contracts_on_other_account_kinds(world: World, db: Session) -> None:
+    giro = make_account(db, world.owner_user, opening=10_000)
+    card = make_account(db, world.owner_user, "Karte", kind=AccountKind.CREDIT_CARD)
+    savings = make_account(db, world.owner_user, "Spar", kind=AccountKind.SAVINGS)
+    cash = make_account(db, world.owner_user, "Bar", kind=AccountKind.CASH)
+    hid = giro.household_id
+    due = date(2026, 11, 20)
+    make_contract(db, hid, account=giro, key="g", amount_cents=-100, next_due_date=due)
+    make_contract(db, hid, account=cash, key="c", amount_cents=-200, next_due_date=due)
+    make_contract(db, hid, key="n", amount_cents=-400, next_due_date=due)  # no account
+    make_contract(db, hid, account=card, key="k", amount_cents=-800, next_due_date=due)
+    make_contract(db, hid, account=savings, key="s", amount_cents=-1_600, next_due_date=due)
+    result = available_to_spend(db, member_of(world.owner_user), date(2026, 11, 10))
+    assert result.upcoming_out_cents == 700
+    assert len(result.items) == 3
+
+
 def test_available_hides_contracts_on_private_accounts(world: World, db: Session) -> None:
     private = make_account(db, world.owner_user, "Privat", AccountVisibility.PRIVATE, opening=1_000)
     make_contract(

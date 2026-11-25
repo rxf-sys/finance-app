@@ -93,6 +93,7 @@ def upgrade() -> None:
     sa.Column('note', sa.Text(), nullable=True),
     sa.Column('confirmed_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('cancelled_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_manual', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], name=op.f('fk_contracts_account_id_accounts'), ondelete='SET NULL'),
