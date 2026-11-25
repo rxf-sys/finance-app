@@ -104,7 +104,7 @@ function Suggestions({ accountId }: { accountId?: string }) {
     <section aria-labelledby="suggestions-title">
       <Card className="p-0">
         <div className="flex items-start gap-3 border-b border-border px-4 py-3">
-          <Lightbulb className="mt-0.5 size-4 text-accent" aria-hidden />
+          <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
           <div>
             <h2 id="suggestions-title" className="text-base font-semibold">
               Vorschläge

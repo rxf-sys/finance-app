@@ -103,7 +103,7 @@ export function SuggestionsBanner() {
       to="/contracts"
       className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-sm hover:bg-surface-muted"
     >
-      <Lightbulb className="size-4 text-accent" aria-hidden />
+      <Lightbulb className="size-4 shrink-0 text-accent" aria-hidden />
       <span className="flex-1">
         <span className="font-medium">
           {count === 1 ? "1 neuer Vertragsvorschlag" : `${count} neue Vertragsvorschläge`} prüfen
