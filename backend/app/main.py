@@ -11,6 +11,7 @@ from app.api import (
     categories,
     contracts,
     dashboard,
+    forecast,
     health,
     household,
     imports,
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
         contracts.router,
         budgets.router,
         available.router,
+        forecast.router,
         notifications.router,
         banking.router,
     ):

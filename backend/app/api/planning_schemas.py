@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, StringConstraints
 
@@ -187,3 +187,48 @@ class UnreadCount(BaseModel):
 
 class ReadAllResult(BaseModel):
     updated: int
+
+
+# ---------------------------------------------------------------- forecast
+
+
+class ForecastDay(BaseModel):
+    date: date
+    balance_cents: int
+
+
+class ForecastMonth(BaseModel):
+    month: str
+    income_cents: int
+    contracts_cents: int = Field(description="Signed sum of contract payments in the month")
+    variable_cents: int = Field(description="Expected variable spending, negative")
+    end_balance_cents: int
+
+
+class ForecastEventOut(BaseModel):
+    date: date
+    kind: Literal["contract", "income"]
+    name: str
+    amount_cents: int
+    contract_id: uuid.UUID | None
+
+
+class ForecastAssumptions(BaseModel):
+    income_baseline_cents: int
+    income_day: int | None
+    variable_baseline_cents: int
+    months_used: int
+
+
+class ForecastOut(BaseModel):
+    """Projected end-of-day balances of the spendable accounts; months cover only days after today."""
+
+    start_balance_cents: int
+    as_of: date
+    horizon_end: date
+    daily: list[ForecastDay]
+    months: list[ForecastMonth]
+    lowest: ForecastDay
+    events: list[ForecastEventOut]
+    assumptions: ForecastAssumptions
+    insufficient_history: bool
