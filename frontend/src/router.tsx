@@ -11,6 +11,7 @@ import { AppShell } from "@/components/app-shell";
 import { currentMonthKey, isMonthKey } from "@/lib/dates";
 import { validateTransactionSearch } from "@/lib/transaction-search";
 import { AccountDetailPage, AccountsPage } from "@/routes/accounts";
+import { BankPage } from "@/routes/bank";
 import { BudgetsPage } from "@/routes/budgets";
 import { CategoriesPage } from "@/routes/categories";
 import { ContractDetailPage } from "@/routes/contract-detail";
@@ -100,6 +101,18 @@ const contractDetailRoute = createRoute({
     return <ContractDetailPage contractId={contractDetailRoute.useParams().contractId} />;
   },
 });
+const bankRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/bank",
+  validateSearch: (raw: Record<string, unknown>): { connection?: string; error?: string } => ({
+    ...(typeof raw.connection === "string" && raw.connection ? { connection: raw.connection } : {}),
+    ...(typeof raw.error === "string" && raw.error ? { error: raw.error } : {}),
+  }),
+  component: function BankRoute() {
+    const { connection, error } = bankRoute.useSearch();
+    return <BankPage connection={connection} error={error} />;
+  },
+});
 const budgetsRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/budgets",
@@ -147,6 +160,7 @@ const routeTree = rootRoute.addChildren([
     contractsRoute,
     contractDetailRoute,
     budgetsRoute,
+    bankRoute,
     categoriesRoute,
     importRoute,
     moreRoute,

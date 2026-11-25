@@ -5,6 +5,7 @@ import {
   FileText,
   Landmark,
   LayoutDashboard,
+  Link2,
   LogOut,
   type LucideIcon,
   Monitor,
@@ -35,6 +36,7 @@ const SIDEBAR_NAV: NavItem[] = [
   { to: "/contracts", label: "Verträge", icon: FileText },
   { to: "/budgets", label: "Budgets", icon: PiggyBank },
   { to: "/accounts", label: "Konten", icon: Landmark },
+  { to: "/bank", label: "Bankverbindungen", icon: Link2 },
   { to: "/import", label: "Import", icon: Upload },
   { to: "/categories", label: "Kategorien & Regeln", icon: Tags },
   { to: "/household", label: "Haushalt", icon: Users },
@@ -48,7 +50,16 @@ const TAB_NAV: NavItem[] = [
   { to: "/contracts", label: "Verträge", icon: FileText },
   { to: "/more", label: "Mehr", icon: Ellipsis },
 ];
-const MORE_PATHS = ["/more", "/accounts", "/budgets", "/import", "/categories", "/household", "/security"];
+const MORE_PATHS = [
+  "/more",
+  "/accounts",
+  "/budgets",
+  "/bank",
+  "/import",
+  "/categories",
+  "/household",
+  "/security",
+];
 
 const THEME_ICON = { system: Monitor, light: Sun, dark: Moon } satisfies Record<Theme, unknown>;
 const THEME_LABEL: Record<Theme, string> = {
