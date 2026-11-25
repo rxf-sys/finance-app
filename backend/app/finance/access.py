@@ -3,18 +3,27 @@
 An account is visible when it belongs to the member's household and is either shared or owned by
 the member. A transaction is visible iff its account is. A contract is visible when it belongs to the
 household and has no account or a visible one. A savings goal is visible when it is shared or owned
-by the member, and its account (if any) is visible. Anything else is reported as 404, never 403, so
+by the member, and its account (if any) is visible. A category rule is visible when it has no
+account condition or its account is visible. Anything else is reported as 404, never 403, so
 ids of hidden rows do not leak.
 """
 
 import uuid
 
 from fastapi import HTTPException, status
-from sqlalchemy import ColumnElement, and_, or_, select
+from sqlalchemy import ColumnElement, String, and_, cast, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.deps import MemberContext
-from app.models import Account, AccountVisibility, Contract, HouseholdMember, SavingsGoal, Transaction
+from app.models import (
+    Account,
+    AccountVisibility,
+    CategoryRule,
+    Contract,
+    HouseholdMember,
+    SavingsGoal,
+    Transaction,
+)
 
 
 def visible_account_clause(member: MemberContext) -> ColumnElement[bool]:
@@ -89,6 +98,29 @@ def get_visible_goal(db: Session, member: MemberContext, goal_id: uuid.UUID) -> 
     if goal is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Savings goal not found")
     return goal
+
+
+def visible_rule_clause(member: MemberContext) -> ColumnElement[bool]:
+    """Rule filter: same household, and no account condition or one on a visible account.
+
+    Conditions of a rule on a private account (counterparty names, amounts) describe that
+    account's bookings, so they are as private as the account.
+    """
+    rule_account = CategoryRule.conditions["account_id"].astext
+    return and_(
+        CategoryRule.household_id == member.household.id,
+        or_(
+            rule_account.is_(None),
+            rule_account.in_(select(cast(Account.id, String)).where(visible_account_clause(member))),
+        ),
+    )
+
+
+def get_visible_rule(db: Session, member: MemberContext, rule_id: uuid.UUID) -> CategoryRule:
+    rule = db.scalar(select(CategoryRule).where(CategoryRule.id == rule_id, visible_rule_clause(member)))
+    if rule is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Rule not found")
+    return rule
 
 
 def account_audience(db: Session, household_id: uuid.UUID, account_id: uuid.UUID | None) -> list[uuid.UUID]:

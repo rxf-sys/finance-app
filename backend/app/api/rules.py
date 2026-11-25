@@ -2,14 +2,14 @@
 
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from sqlalchemy import case, select
 from sqlalchemy.orm import Session
 
 from app.api import finance_schemas as schemas
 from app.api.categories import get_category
 from app.deps import CurrentMember, DbDep, MemberContext
-from app.finance.access import get_visible_account
+from app.finance.access import get_visible_account, get_visible_rule, visible_rule_clause
 from app.finance.rules import RuleConditions, apply_rules_for_member
 from app.models import CategoryRule, RuleSource
 
@@ -18,17 +18,6 @@ router = APIRouter(prefix="/rules", tags=["rules"])
 
 def _out(rule: CategoryRule) -> schemas.RuleOut:
     return schemas.RuleOut.model_validate(rule, from_attributes=True)
-
-
-def _get_rule(db: Session, member: MemberContext, rule_id: uuid.UUID) -> CategoryRule:
-    rule = db.scalar(
-        select(CategoryRule).where(
-            CategoryRule.id == rule_id, CategoryRule.household_id == member.household.id
-        )
-    )
-    if rule is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Rule not found")
-    return rule
 
 
 def _check_conditions(db: Session, member: MemberContext, conditions: RuleConditions) -> None:
@@ -40,7 +29,7 @@ def _check_conditions(db: Session, member: MemberContext, conditions: RuleCondit
 def list_rules(member: CurrentMember, db: DbDep) -> list[schemas.RuleOut]:
     rules = db.scalars(
         select(CategoryRule)
-        .where(CategoryRule.household_id == member.household.id)
+        .where(visible_rule_clause(member))
         .order_by(
             case((CategoryRule.source == RuleSource.MANUAL, 0), else_=1),
             CategoryRule.priority,
@@ -80,7 +69,7 @@ def apply_all_rules(member: CurrentMember, db: DbDep) -> schemas.RulesApplied:
 def update_rule(
     rule_id: uuid.UUID, body: schemas.RuleUpdate, member: CurrentMember, db: DbDep
 ) -> schemas.RuleOut:
-    rule = _get_rule(db, member, rule_id)
+    rule = get_visible_rule(db, member, rule_id)
     if body.category_id is not None:
         get_category(db, member, body.category_id)
         rule.category_id = body.category_id
@@ -97,4 +86,4 @@ def update_rule(
 
 @router.delete("/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_rule(rule_id: uuid.UUID, member: CurrentMember, db: DbDep) -> None:
-    db.delete(_get_rule(db, member, rule_id))
+    db.delete(get_visible_rule(db, member, rule_id))
