@@ -485,6 +485,111 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Runs */
+        get: operations["list_runs_api_imports_get"];
+        put?: never;
+        /** Commit Import */
+        post: operations["commit_import_api_imports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Analyze */
+        post: operations["analyze_api_imports_analyze_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/presets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Presets */
+        get: operations["list_presets_api_imports_presets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview */
+        post: operations["preview_api_imports_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Profiles */
+        get: operations["list_profiles_api_imports_profiles_get"];
+        put?: never;
+        /** Create Profile */
+        post: operations["create_profile_api_imports_profiles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/profiles/{profile_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Profile */
+        delete: operations["delete_profile_api_imports_profiles__profile_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Profile */
+        patch: operations["update_profile_api_imports_profiles__profile_id__patch"];
+        trace?: never;
+    };
     "/api/rules": {
         parameters: {
             query?: never;
@@ -735,6 +840,34 @@ export interface components {
          * @enum {string}
          */
         AccountVisibility: "shared" | "private";
+        /** AnalyzeOut */
+        AnalyzeOut: {
+            /**
+             * Confidence
+             * @enum {string}
+             */
+            confidence: "high" | "medium" | "low";
+            format: components["schemas"]["CsvFormat"] | null;
+            /** Header Row */
+            header_row: number | null;
+            /** Headers */
+            headers: string[];
+            /** Preset Key */
+            preset_key: string | null;
+            /** Sample Rows */
+            sample_rows: string[][];
+            /** Unmapped Headers */
+            unmapped_headers: string[];
+            /** Unmapped Required */
+            unmapped_required: string[];
+        };
+        /** AnalyzeRequest */
+        AnalyzeRequest: {
+            /** Content Base64 */
+            content_base64: string;
+            /** Filename */
+            filename: string;
+        };
         /** BalancePoint */
         BalancePoint: {
             /** Balance Cents */
@@ -792,6 +925,78 @@ export interface components {
             kind?: components["schemas"]["CategoryKind"] | null;
             /** Name */
             name?: string | null;
+        };
+        /**
+         * ColumnMap
+         * @description Which CSV column feeds which field. Values are header names (matched loosely).
+         */
+        ColumnMap: {
+            /** Amount */
+            amount?: string | null;
+            /** Balance */
+            balance?: string | null;
+            /** Booking Date */
+            booking_date: string;
+            /** Booking Text */
+            booking_text?: string | null;
+            counterparty_iban?: components["schemas"]["NameOrNames"] | null;
+            counterparty_name?: components["schemas"]["NameOrNames"] | null;
+            /** Credit */
+            credit?: string | null;
+            /** Currency */
+            currency?: string | null;
+            /** Debit */
+            debit?: string | null;
+            /** Debit Markers */
+            debit_markers?: string[];
+            purpose?: components["schemas"]["NameOrNames"] | null;
+            /** Sign Column */
+            sign_column?: string | null;
+            /** Value Date */
+            value_date?: string | null;
+        };
+        /**
+         * CsvFormat
+         * @description File-level settings plus the column map.
+         */
+        CsvFormat: {
+            columns: components["schemas"]["ColumnMap"];
+            /**
+             * Date Format
+             * @default %d.%m.%Y
+             */
+            date_format: string | string[];
+            /**
+             * Decimal Separator
+             * @default ,
+             * @enum {string}
+             */
+            decimal_separator: "," | ".";
+            /**
+             * Delimiter
+             * @default ;
+             * @enum {string}
+             */
+            delimiter: ";" | "," | "\t";
+            /**
+             * Encoding
+             * @default auto
+             * @enum {string}
+             */
+            encoding: "auto" | "utf-8" | "utf-8-sig" | "cp1252" | "iso-8859-1";
+            /** Header Row */
+            header_row?: number | null;
+            /**
+             * Quotechar
+             * @default "
+             */
+            quotechar: string;
+            /**
+             * Thousands Separator
+             * @default .
+             * @enum {string}
+             */
+            thousands_separator: "." | "," | " " | "";
         };
         /** DashboardAccount */
         DashboardAccount: {
@@ -852,6 +1057,63 @@ export interface components {
          * @enum {string}
          */
         HouseholdRole: "owner" | "member";
+        /** ImportRequest */
+        ImportRequest: {
+            /**
+             * Account Id
+             * Format: uuid
+             */
+            account_id: string;
+            /** Content Base64 */
+            content_base64: string;
+            /** Filename */
+            filename: string;
+            format: components["schemas"]["CsvFormat"];
+            /** Profile Name */
+            profile_name?: string | null;
+        };
+        /** ImportRunOut */
+        ImportRunOut: {
+            /**
+             * Account Id
+             * Format: uuid
+             */
+            account_id: string;
+            /** Error */
+            error: string | null;
+            /** Filename */
+            filename: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Profile Name */
+            profile_name: string;
+            /** Rows Duplicate */
+            rows_duplicate: number;
+            /** Rows New */
+            rows_new: number;
+            /** Rows Skipped */
+            rows_skipped: number;
+            /** Rows Total */
+            rows_total: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            status: components["schemas"]["ImportStatus"];
+            /** User Id */
+            user_id: string | null;
+        };
+        /**
+         * ImportStatus
+         * @enum {string}
+         */
+        ImportStatus: "completed" | "failed";
         /** InviteAcceptRequest */
         InviteAcceptRequest: {
             /** Display Name */
@@ -969,6 +1231,7 @@ export interface components {
              */
             user_id: string;
         };
+        NameOrNames: string | string[];
         /** Passkey */
         Passkey: {
             /**
@@ -1018,6 +1281,103 @@ export interface components {
             current_password: string;
             /** New Password */
             new_password: string;
+        };
+        /** PresetOut */
+        PresetOut: {
+            format: components["schemas"]["CsvFormat"];
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+        };
+        /** PreviewOut */
+        PreviewOut: {
+            /** Errors */
+            errors: components["schemas"]["RowErrorOut"][];
+            /** Errors Total */
+            errors_total: number;
+            /** Rows */
+            rows: components["schemas"]["PreviewRowOut"][];
+            /** Rows Duplicate */
+            rows_duplicate: number;
+            /** Rows New */
+            rows_new: number;
+            /** Rows Skipped */
+            rows_skipped: number;
+            /** Rows Total */
+            rows_total: number;
+        };
+        /** PreviewRequest */
+        PreviewRequest: {
+            /**
+             * Account Id
+             * Format: uuid
+             */
+            account_id: string;
+            /** Content Base64 */
+            content_base64: string;
+            /** Filename */
+            filename: string;
+            format: components["schemas"]["CsvFormat"];
+        };
+        /** PreviewRowOut */
+        PreviewRowOut: {
+            /** Amount Cents */
+            amount_cents: number;
+            /**
+             * Booking Date
+             * Format: date
+             */
+            booking_date: string;
+            /** Counterparty Name */
+            counterparty_name: string | null;
+            /** Currency */
+            currency: string;
+            /** Is Duplicate */
+            is_duplicate: boolean;
+            /** Line No */
+            line_no: number;
+            /** Purpose */
+            purpose: string;
+            /** Suggested Category Id */
+            suggested_category_id: string | null;
+            /** Suggested Category Name */
+            suggested_category_name: string | null;
+        };
+        /** ProfileCreate */
+        ProfileCreate: {
+            format: components["schemas"]["CsvFormat"];
+            /** Name */
+            name: string;
+        };
+        /** ProfileOut */
+        ProfileOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            format: components["schemas"]["CsvFormat"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+        };
+        /** ProfileUpdate */
+        ProfileUpdate: {
+            format?: components["schemas"]["CsvFormat"] | null;
+            /** Name */
+            name?: string | null;
+        };
+        /** RowErrorOut */
+        RowErrorOut: {
+            /** Line No */
+            line_no: number;
+            /** Message */
+            message: string;
         };
         /**
          * RuleConditions
@@ -2508,6 +2868,309 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_runs_api_imports_get: {
+        parameters: {
+            query?: {
+                account_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportRunOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    commit_import_api_imports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportRunOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    analyze_api_imports_analyze_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyzeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyzeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_presets_api_imports_presets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresetOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_api_imports_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_profiles_api_imports_profiles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_profile_api_imports_profiles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_profile_api_imports_profiles__profile_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_profile_api_imports_profiles__profile_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                profile_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
             };
             /** @description Validation Error */
             422: {

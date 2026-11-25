@@ -9,6 +9,7 @@ from app.api import (
     dashboard,
     health,
     household,
+    imports,
     rules,
     tags,
     transactions,
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
         rules.router,
         tags.router,
         transactions.router,
+        imports.router,
         dashboard.router,
     ):
         protected.include_router(router)
