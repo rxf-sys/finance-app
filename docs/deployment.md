@@ -180,6 +180,12 @@ werden alle bestehenden Geräte-Abos ungültig; jedes Gerät muss den Schalter a
 Mitglieds. Hinweise, die älter als 24 Stunden sind, werden nicht mehr gepusht. Im Log stehen bei Fehlern nur
 Statuscode und Push-Dienst, nie Inhalte.
 
+**Ruhezeiten:** Zwischen 22 und 7 Uhr (Europe/Berlin) wird nichts gepusht. Hinweise aus der Nacht gehen mit dem
+ersten Lauf nach 7 Uhr raus. *Test senden* gilt nicht als Hinweis und funktioniert auch nachts.
+
+**Abmelden:** Beim Abmelden über die App wird das Abo dieses Geräts entfernt; nach der nächsten Anmeldung muss
+der Schalter wieder eingeschaltet werden. Die Abos anderer Geräte bleiben bestehen.
+
 ## Updates
 
 ```sh
