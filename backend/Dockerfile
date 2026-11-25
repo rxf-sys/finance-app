@@ -11,6 +11,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /usr/local/bin/uv
 
+# Pull Debian security fixes that are newer than the base image, so a rebuild picks
+# them up without waiting for an updated python:3.13-slim tag.
+RUN apt-get update \
+ && apt-get upgrade --yes --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
+
 # The app runs from a uv-managed venv; the base image's pip (and its vendored
 # packages) is not needed at runtime, so remove it instead of shipping it.
 RUN python -m pip uninstall --yes --root-user-action=ignore pip
