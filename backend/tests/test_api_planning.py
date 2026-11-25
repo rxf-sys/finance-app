@@ -222,6 +222,19 @@ def test_cancellation_letter(world: World, db: Session) -> None:
     assert "4711" in letter["subject"] and "4711" in letter["body"]
     assert "zum nächstmöglichen Zeitpunkt" in letter["body"]
     assert letter["body"].rstrip().endswith("Member")
+    assert "Nach meiner Berechnung" not in letter["body"]  # no term data, so no end date
+
+
+def test_cancellation_letter_names_the_earliest_end_date(world: World, db: Session) -> None:
+    contract = make_contract(
+        db,
+        member_of(world.owner_user).household.id,
+        min_term_end=date(2099, 12, 31),
+        notice_period_days=30,
+    )
+    db.commit()
+    letter = _json(world.member.get(f"{CONTRACTS}/{contract.id}/cancellation-letter"))
+    assert "zum nächstmöglichen Zeitpunkt. Nach meiner Berechnung ist das der 31.12.2099." in letter["body"]
 
 
 # ---------------------------------------------------------------- budgets

@@ -23,7 +23,9 @@ from app.finance.access import (
 from app.finance.contracts import (
     add_interval,
     cancellation_deadline,
+    cancellation_letter_text,
     detect_contracts,
+    earliest_end_date,
 )
 from app.finance.normalize import normalize_iban, normalize_text
 from app.models import (
@@ -400,17 +402,10 @@ def cancellation_letter(
     contract_id: uuid.UUID, member: CurrentMember, db: DbDep
 ) -> schemas.CancellationLetter:
     contract = get_visible_contract(db, member, contract_id)
-    reference = f"Kundennummer: {contract.customer_number}\n\n" if contract.customer_number else ""
-    subject = "Kündigung meines Vertrags"
-    if contract.customer_number:
-        subject += f" (Kundennummer {contract.customer_number})"
-    body = (
-        "Sehr geehrte Damen und Herren,\n\n"
-        f"{reference}"
-        f'hiermit kündige ich meinen Vertrag mit der Bezeichnung "{contract.name}" '
-        "ordentlich und fristgerecht zum nächstmöglichen Zeitpunkt.\n\n"
-        "Bitte bestätigen Sie mir die Kündigung sowie das Datum der Vertragsbeendigung schriftlich.\n\n"
-        "Mit freundlichen Grüßen\n"
-        f"{member.user.display_name}"
+    subject, body = cancellation_letter_text(
+        contract_name=contract.name,
+        customer_number=contract.customer_number,
+        sender=member.user.display_name,
+        end_date=earliest_end_date(contract),
     )
     return schemas.CancellationLetter(subject=subject, body=body, recipient_name=contract.name)

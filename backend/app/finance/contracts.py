@@ -83,6 +83,19 @@ def interval_matches(days: float, interval: ContractInterval) -> bool:
     return abs(days - NOMINAL_DAYS[interval]) <= _TOLERANCE_DAYS[interval]
 
 
+def _next_open_term(contract: Contract, today: date) -> tuple[date, date] | None:
+    """(term end, cancellation deadline) of the first term whose deadline is not in the past."""
+    if contract.min_term_end is None or contract.notice_period_days is None:
+        return None
+    notice = timedelta(days=contract.notice_period_days)
+    steps = 0
+    term_end = contract.min_term_end
+    while term_end - notice < today:
+        steps += 1
+        term_end = add_months_clamped(contract.min_term_end, steps)
+    return term_end, term_end - notice
+
+
 def cancellation_deadline(contract: Contract, today: date | None = None) -> date | None:
     """The next cancellation deadline that is not in the past: term end minus the notice period.
 
@@ -91,16 +104,40 @@ def cancellation_deadline(contract: Contract, today: date | None = None) -> date
     preserved, clamped). If the deadline of the current term has already passed, the deadline of
     the following term is returned. A deadline falling on `today` still counts.
     """
-    if contract.min_term_end is None or contract.notice_period_days is None:
-        return None
-    today = today or today_berlin()
-    notice = timedelta(days=contract.notice_period_days)
-    steps = 0
-    deadline = contract.min_term_end - notice
-    while deadline < today:
-        steps += 1
-        deadline = add_months_clamped(contract.min_term_end, steps) - notice
-    return deadline
+    term = _next_open_term(contract, today or today_berlin())
+    return term[1] if term else None
+
+
+def earliest_end_date(contract: Contract, today: date | None = None) -> date | None:
+    """The term end a cancellation sent today can still reach (same assumptions as the deadline).
+
+    None when the minimum term end or the notice period is unknown, because the date could not
+    be computed reliably then.
+    """
+    term = _next_open_term(contract, today or today_berlin())
+    return term[0] if term else None
+
+
+def cancellation_letter_text(
+    *, contract_name: str, customer_number: str | None, sender: str, end_date: date | None
+) -> tuple[str, str]:
+    """Subject and body (German) of the cancellation letter; the end date line only when known."""
+    subject = "Kündigung meines Vertrags"
+    reference = ""
+    if customer_number:
+        subject += f" (Kundennummer {customer_number})"
+        reference = f"Kundennummer: {customer_number}\n\n"
+    end_line = f" Nach meiner Berechnung ist das der {end_date:%d.%m.%Y}." if end_date else ""
+    body = (
+        "Sehr geehrte Damen und Herren,\n\n"
+        f"{reference}"
+        f'hiermit kündige ich meinen Vertrag mit der Bezeichnung "{contract_name}" '
+        f"ordentlich und fristgerecht zum nächstmöglichen Zeitpunkt.{end_line}\n\n"
+        "Bitte bestätigen Sie mir die Kündigung sowie das Datum der Vertragsbeendigung schriftlich.\n\n"
+        "Mit freundlichen Grüßen\n"
+        f"{sender}"
+    )
+    return subject, body
 
 
 # ---------------------------------------------------------------- keys
