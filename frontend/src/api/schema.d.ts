@@ -329,6 +329,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/available": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Available */
+        get: operations["get_available_api_available_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/budgets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Budgets */
+        get: operations["list_budgets_api_budgets_get"];
+        put?: never;
+        /** Create Budget */
+        post: operations["create_budget_api_budgets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/budgets/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Status */
+        get: operations["get_status_api_budgets_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/budgets/{budget_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Budget */
+        delete: operations["delete_budget_api_budgets__budget_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Budget */
+        patch: operations["update_budget_api_budgets__budget_id__patch"];
+        trace?: never;
+    };
     "/api/categories": {
         parameters: {
             query?: never;
@@ -380,6 +450,182 @@ export interface paths {
         head?: never;
         /** Update Category */
         patch: operations["update_category_api_categories__category_id__patch"];
+        trace?: never;
+    };
+    "/api/contracts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Contracts */
+        get: operations["list_contracts_api_contracts_get"];
+        put?: never;
+        /** Create Contract */
+        post: operations["create_contract_api_contracts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/detect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Detect */
+        post: operations["detect_api_contracts_detect_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contracts Summary */
+        get: operations["contracts_summary_api_contracts_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Contract */
+        get: operations["get_contract_api_contracts__contract_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Contract */
+        delete: operations["delete_contract_api_contracts__contract_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Contract */
+        patch: operations["update_contract_api_contracts__contract_id__patch"];
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Contract */
+        post: operations["cancel_contract_api_contracts__contract_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/cancellation-letter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cancellation Letter */
+        get: operations["cancellation_letter_api_contracts__contract_id__cancellation_letter_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Contract */
+        post: operations["confirm_contract_api_contracts__contract_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/ignore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ignore Contract */
+        post: operations["ignore_contract_api_contracts__contract_id__ignore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/price-changes/{price_change_id}/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge Price Change */
+        post: operations["acknowledge_price_change_api_contracts__contract_id__price_changes__price_change_id__acknowledge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contracts/{contract_id}/reactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reactivate Contract
+         * @description A cancelled contract runs again; an ignored suggestion becomes a suggestion again.
+         */
+        post: operations["reactivate_contract_api_contracts__contract_id__reactivate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/dashboard": {
@@ -588,6 +834,74 @@ export interface paths {
         head?: never;
         /** Update Profile */
         patch: operations["update_profile_api_imports_profiles__profile_id__patch"];
+        trace?: never;
+    };
+    "/api/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Notifications */
+        get: operations["list_notifications_api_notifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read All */
+        post: operations["read_all_api_notifications_read_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Unread Count */
+        get: operations["unread_count_api_notifications_unread_count_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/{notification_id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Read */
+        post: operations["mark_read_api_notifications__notification_id__read_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/rules": {
@@ -868,12 +1182,123 @@ export interface components {
             /** Filename */
             filename: string;
         };
+        /** AvailableItem */
+        AvailableItem: {
+            /** Amount Cents */
+            amount_cents: number;
+            /**
+             * Contract Id
+             * Format: uuid
+             */
+            contract_id: string;
+            /**
+             * Due Date
+             * Format: date
+             */
+            due_date: string;
+            /** Name */
+            name: string;
+        };
+        /** AvailableOut */
+        AvailableOut: {
+            /** Available Cents */
+            available_cents: number;
+            /** Balance Cents */
+            balance_cents: number;
+            /** Items */
+            items: components["schemas"]["AvailableItem"][];
+            /** Upcoming In Cents */
+            upcoming_in_cents: number;
+            /** Upcoming Out Cents */
+            upcoming_out_cents: number;
+        };
         /** BalancePoint */
         BalancePoint: {
             /** Balance Cents */
             balance_cents: number;
             /** Month */
             month: string;
+        };
+        /** BudgetCreate */
+        BudgetCreate: {
+            /** Amount Cents */
+            amount_cents: number;
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /**
+             * Rollover
+             * @default false
+             */
+            rollover: boolean;
+        };
+        /** BudgetOut */
+        BudgetOut: {
+            /** Amount Cents */
+            amount_cents: number;
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /** Category Name */
+            category_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Rollover */
+            rollover: boolean;
+        };
+        /** BudgetStatusOut */
+        BudgetStatusOut: {
+            /** Amount Cents */
+            amount_cents: number;
+            /**
+             * Category Id
+             * Format: uuid
+             */
+            category_id: string;
+            /** Category Name */
+            category_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Limit Cents */
+            limit_cents: number;
+            /** Month */
+            month: string;
+            /** Pct */
+            pct: number;
+            /** Remaining Cents */
+            remaining_cents: number;
+            /** Rollover */
+            rollover: boolean;
+            /** Spent Cents */
+            spent_cents: number;
+            /** State */
+            state: string;
+        };
+        /** BudgetUpdate */
+        BudgetUpdate: {
+            /** Amount Cents */
+            amount_cents?: number | null;
+            /** Rollover */
+            rollover?: boolean | null;
+        };
+        /** CancellationLetter */
+        CancellationLetter: {
+            /** Body */
+            body: string;
+            /** Recipient Name */
+            recipient_name: string;
+            /** Subject */
+            subject: string;
         };
         /** CategoryCreate */
         CategoryCreate: {
@@ -954,6 +1379,229 @@ export interface components {
             sign_column?: string | null;
             /** Value Date */
             value_date?: string | null;
+        };
+        /** ContractCreate */
+        ContractCreate: {
+            /** Account Id */
+            account_id?: string | null;
+            /**
+             * Amount Tolerance Pct
+             * @default 10
+             */
+            amount_tolerance_pct: number;
+            /** Category Id */
+            category_id?: string | null;
+            /** Counterparty Iban */
+            counterparty_iban?: string | null;
+            /** Counterparty Name */
+            counterparty_name?: string | null;
+            /** Customer Number */
+            customer_number?: string | null;
+            /**
+             * Expected Amount Cents
+             * @description Signed: negative is a payment
+             */
+            expected_amount_cents: number;
+            interval: components["schemas"]["ContractInterval"];
+            /** @default other */
+            kind: components["schemas"]["ContractKind"];
+            /** Min Term End */
+            min_term_end?: string | null;
+            /** Name */
+            name: string;
+            /** Next Due Date */
+            next_due_date?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Notice Period Days */
+            notice_period_days?: number | null;
+            /** Start Date */
+            start_date?: string | null;
+        };
+        /** ContractDetail */
+        ContractDetail: {
+            /** Account Id */
+            account_id: string | null;
+            /** Amount Tolerance Pct */
+            amount_tolerance_pct: number;
+            /** Cancellation Deadline */
+            cancellation_deadline: string | null;
+            /** Cancelled At */
+            cancelled_at: string | null;
+            /** Category Id */
+            category_id: string | null;
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Customer Number */
+            customer_number: string | null;
+            /** Expected Amount Cents */
+            expected_amount_cents: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            interval: components["schemas"]["ContractInterval"];
+            /** Is Manual */
+            is_manual: boolean;
+            kind: components["schemas"]["ContractKind"];
+            /** Last Payment Date */
+            last_payment_date: string | null;
+            /** Min Term End */
+            min_term_end: string | null;
+            /** Monthly Amount Cents */
+            monthly_amount_cents: number;
+            /** Name */
+            name: string;
+            /** Next Due Date */
+            next_due_date: string | null;
+            /** Note */
+            note: string | null;
+            /** Notice Period Days */
+            notice_period_days: number | null;
+            /** Payments Count */
+            payments_count: number;
+            /** Price Changes */
+            price_changes: components["schemas"]["PriceChangeOut"][];
+            /** Start Date */
+            start_date: string | null;
+            status: components["schemas"]["ContractStatus"];
+            /** Transactions */
+            transactions: components["schemas"]["ContractTransactionOut"][];
+            unacknowledged_price_change: components["schemas"]["PriceChangeOut"] | null;
+        };
+        /**
+         * ContractInterval
+         * @enum {string}
+         */
+        ContractInterval: "weekly" | "monthly" | "quarterly" | "half_yearly" | "yearly";
+        /**
+         * ContractKind
+         * @enum {string}
+         */
+        ContractKind: "subscription" | "insurance" | "utilities" | "telecom" | "rent" | "loan" | "other";
+        /** ContractOut */
+        ContractOut: {
+            /** Account Id */
+            account_id: string | null;
+            /** Amount Tolerance Pct */
+            amount_tolerance_pct: number;
+            /** Cancellation Deadline */
+            cancellation_deadline: string | null;
+            /** Cancelled At */
+            cancelled_at: string | null;
+            /** Category Id */
+            category_id: string | null;
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Customer Number */
+            customer_number: string | null;
+            /** Expected Amount Cents */
+            expected_amount_cents: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            interval: components["schemas"]["ContractInterval"];
+            /** Is Manual */
+            is_manual: boolean;
+            kind: components["schemas"]["ContractKind"];
+            /** Last Payment Date */
+            last_payment_date: string | null;
+            /** Min Term End */
+            min_term_end: string | null;
+            /** Monthly Amount Cents */
+            monthly_amount_cents: number;
+            /** Name */
+            name: string;
+            /** Next Due Date */
+            next_due_date: string | null;
+            /** Note */
+            note: string | null;
+            /** Notice Period Days */
+            notice_period_days: number | null;
+            /** Payments Count */
+            payments_count: number;
+            /** Start Date */
+            start_date: string | null;
+            status: components["schemas"]["ContractStatus"];
+            unacknowledged_price_change: components["schemas"]["PriceChangeOut"] | null;
+        };
+        /**
+         * ContractStatus
+         * @enum {string}
+         */
+        ContractStatus: "detected" | "confirmed" | "cancelled" | "ignored";
+        /** ContractSummary */
+        ContractSummary: {
+            /** By Kind */
+            by_kind: components["schemas"]["KindSummary"][];
+            /** Detected Count */
+            detected_count: number;
+            /** Monthly Cost Cents */
+            monthly_cost_cents: number;
+            /** Monthly Income Cents */
+            monthly_income_cents: number;
+        };
+        /** ContractTransactionOut */
+        ContractTransactionOut: {
+            /**
+             * Account Id
+             * Format: uuid
+             */
+            account_id: string;
+            /** Amount Cents */
+            amount_cents: number;
+            /**
+             * Booking Date
+             * Format: date
+             */
+            booking_date: string;
+            /** Counterparty Name */
+            counterparty_name: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Purpose */
+            purpose: string | null;
+        };
+        /** ContractUpdate */
+        ContractUpdate: {
+            /** Account Id */
+            account_id?: string | null;
+            /** Amount Tolerance Pct */
+            amount_tolerance_pct?: number | null;
+            /** Category Id */
+            category_id?: string | null;
+            /** Customer Number */
+            customer_number?: string | null;
+            /** Expected Amount Cents */
+            expected_amount_cents?: number | null;
+            interval?: components["schemas"]["ContractInterval"] | null;
+            kind?: components["schemas"]["ContractKind"] | null;
+            /** Min Term End */
+            min_term_end?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Notice Period Days */
+            notice_period_days?: number | null;
+            /** Start Date */
+            start_date?: string | null;
         };
         /**
          * CsvFormat
@@ -1176,6 +1824,14 @@ export interface components {
             id: string;
             role: components["schemas"]["HouseholdRole"];
         };
+        /** KindSummary */
+        KindSummary: {
+            /** Count */
+            count: number;
+            kind: components["schemas"]["ContractKind"];
+            /** Monthly Cost Cents */
+            monthly_cost_cents: number;
+        };
         /** LoginRequest */
         LoginRequest: {
             /** Email */
@@ -1232,6 +1888,33 @@ export interface components {
             user_id: string;
         };
         NameOrNames: string | string[];
+        /**
+         * NotificationKind
+         * @enum {string}
+         */
+        NotificationKind: "contract_notice" | "price_change" | "budget_warning" | "consent_expiry" | "sync_failed";
+        /** NotificationOut */
+        NotificationOut: {
+            /** Body */
+            body: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            kind: components["schemas"]["NotificationKind"];
+            /** Link */
+            link: string | null;
+            /** Read At */
+            read_at: string | null;
+            /** Title */
+            title: string;
+        };
         /** Passkey */
         Passkey: {
             /**
@@ -1344,6 +2027,27 @@ export interface components {
             /** Suggested Category Name */
             suggested_category_name: string | null;
         };
+        /** PriceChangeOut */
+        PriceChangeOut: {
+            /** Acknowledged At */
+            acknowledged_at: string | null;
+            /**
+             * Effective Date
+             * Format: date
+             */
+            effective_date: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** New Amount Cents */
+            new_amount_cents: number;
+            /** Old Amount Cents */
+            old_amount_cents: number;
+            /** Transaction Id */
+            transaction_id: string | null;
+        };
         /** ProfileCreate */
         ProfileCreate: {
             format: components["schemas"]["CsvFormat"];
@@ -1371,6 +2075,11 @@ export interface components {
             format?: components["schemas"]["CsvFormat"] | null;
             /** Name */
             name?: string | null;
+        };
+        /** ReadAllResult */
+        ReadAllResult: {
+            /** Updated */
+            updated: number;
         };
         /** RowErrorOut */
         RowErrorOut: {
@@ -1796,6 +2505,11 @@ export interface components {
             income_cents: number;
             /** Month */
             month: string;
+        };
+        /** UnreadCount */
+        UnreadCount: {
+            /** Count */
+            count: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -2501,6 +3215,204 @@ export interface operations {
             };
         };
     };
+    get_available_api_available_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailableOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_budgets_api_budgets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_budget_api_budgets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BudgetCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_status_api_budgets_status_get: {
+        parameters: {
+            query?: {
+                month?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetStatusOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_budget_api_budgets__budget_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                budget_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_budget_api_budgets__budget_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                budget_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BudgetUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BudgetOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_categories_api_categories_get: {
         parameters: {
             query?: never;
@@ -2653,6 +3565,438 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CategoryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_contracts_api_contracts_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["ContractStatus"] | null;
+                kind?: components["schemas"]["ContractKind"] | null;
+                account_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_contract_api_contracts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContractCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    detect_api_contracts_detect_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contracts_summary_api_contracts_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_contract_api_contracts__contract_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_contract_api_contracts__contract_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_contract_api_contracts__contract_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContractUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_contract_api_contracts__contract_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancellation_letter_api_contracts__contract_id__cancellation_letter_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CancellationLetter"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_contract_api_contracts__contract_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ignore_contract_api_contracts__contract_id__ignore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    acknowledge_price_change_api_contracts__contract_id__price_changes__price_change_id__acknowledge_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+                price_change_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriceChangeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reactivate_contract_api_contracts__contract_id__reactivate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contract_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractOut"];
                 };
             };
             /** @description Validation Error */
@@ -3170,6 +4514,135 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_notifications_api_notifications_get: {
+        parameters: {
+            query?: {
+                unread_only?: boolean;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_all_api_notifications_read_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadAllResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unread_count_api_notifications_unread_count_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadCount"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_read_api_notifications__notification_id__read_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notification_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOut"];
                 };
             };
             /** @description Validation Error */
