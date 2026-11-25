@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.deps import MemberContext
+from app.finance.contracts import detect_contracts, match_payments
 from app.finance.dedupe import compute_dedupe_hash
 from app.finance.normalize import normalize_text
 from app.finance.rules import apply_rules, load_rules, matches
@@ -247,6 +248,8 @@ def run_import(
         ) from exc
     apply_rules(db, member.household.id, transactions)
     detect_transfers(db, member.household.id, transactions, member=member)
+    match_payments(db, member.household.id, transactions)
+    detect_contracts(db, member.household.id, account_ids=[account.id])
     db.flush()
     return run
 

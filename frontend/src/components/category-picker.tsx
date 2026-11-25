@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { type ReactNode, useId, useMemo, useState } from "react";
+import type { CategoryKind } from "@/api/client";
 import { categoriesQuery } from "@/api/queries";
 import { CategoryIconTile } from "@/components/category-badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,6 +18,8 @@ type CategoryPickerProps = {
   extraOption?: { label: string; selected: boolean; onSelect: () => void };
   /** Custom trigger content; defaults to the selected category name. */
   children?: ReactNode;
+  /** Offer only categories of this kind (e.g. expense categories for budgets). */
+  kind?: CategoryKind;
   className?: string;
   id?: string;
   "aria-label"?: string;
@@ -29,6 +32,7 @@ export function CategoryPicker({
   placeholder = "Kategorie wählen",
   extraOption,
   children,
+  kind,
   className,
   id,
   ...props
@@ -39,7 +43,10 @@ export function CategoryPicker({
   const listId = useId();
 
   const index = useMemo(() => categoryIndex(categories), [categories]);
-  const tree = useMemo(() => buildCategoryTree(categories), [categories]);
+  const tree = useMemo(
+    () => buildCategoryTree(categories).filter((top) => !kind || top.kind === kind),
+    [categories, kind],
+  );
   const selected = value ? index.get(value) : undefined;
 
   const needle = search.trim().toLocaleLowerCase("de");

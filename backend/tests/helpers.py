@@ -15,6 +15,10 @@ from app.models import (
     AccountVisibility,
     Category,
     CategoryKind,
+    Contract,
+    ContractInterval,
+    ContractKind,
+    ContractStatus,
     Transaction,
     User,
 )
@@ -117,3 +121,40 @@ class World:
     owner_user: User
     member_user: User
     stranger_user: User
+
+
+def make_contract(
+    db: Session,
+    household_id: uuid.UUID,
+    *,
+    account: Account | None = None,
+    name: str = "Netflix",
+    key: str = "netflix",
+    status: ContractStatus = ContractStatus.CONFIRMED,
+    interval: ContractInterval = ContractInterval.MONTHLY,
+    amount_cents: int = -999,
+    kind: ContractKind = ContractKind.SUBSCRIPTION,
+    last_payment_date: date | None = None,
+    next_due_date: date | None = None,
+    min_term_end: date | None = None,
+    notice_period_days: int | None = None,
+) -> Contract:
+    contract = Contract(
+        id=uuid.uuid4(),
+        household_id=household_id,
+        account_id=account.id if account else None,
+        name=name,
+        kind=kind,
+        status=status,
+        counterparty_key=key,
+        interval=interval,
+        expected_amount_cents=amount_cents,
+        amount_tolerance_pct=10,
+        last_payment_date=last_payment_date,
+        next_due_date=next_due_date,
+        min_term_end=min_term_end,
+        notice_period_days=notice_period_days,
+    )
+    db.add(contract)
+    db.commit()
+    return contract

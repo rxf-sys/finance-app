@@ -5,11 +5,16 @@ from fastapi import APIRouter, Depends, FastAPI
 from app.api import (
     accounts,
     auth,
+    available,
+    banking,
+    budgets,
     categories,
+    contracts,
     dashboard,
     health,
     household,
     imports,
+    notifications,
     rules,
     tags,
     transactions,
@@ -42,6 +47,11 @@ def create_app() -> FastAPI:
         transactions.router,
         imports.router,
         dashboard.router,
+        contracts.router,
+        budgets.router,
+        available.router,
+        notifications.router,
+        banking.router,
     ):
         protected.include_router(router)
     api.include_router(protected)

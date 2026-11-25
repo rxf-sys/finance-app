@@ -11,7 +11,11 @@ import { AppShell } from "@/components/app-shell";
 import { currentMonthKey, isMonthKey } from "@/lib/dates";
 import { validateTransactionSearch } from "@/lib/transaction-search";
 import { AccountDetailPage, AccountsPage } from "@/routes/accounts";
+import { BankPage } from "@/routes/bank";
+import { BudgetsPage } from "@/routes/budgets";
 import { CategoriesPage } from "@/routes/categories";
+import { ContractDetailPage } from "@/routes/contract-detail";
+import { ContractsPage } from "@/routes/contracts";
 import { DashboardPage } from "@/routes/dashboard";
 import { HouseholdPage } from "@/routes/household";
 import { ImportPage } from "@/routes/import";
@@ -85,6 +89,40 @@ const transactionsRoute = createRoute({
     return <TransactionsPage search={transactionsRoute.useSearch()} />;
   },
 });
+const contractsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/contracts",
+  component: ContractsPage,
+});
+const contractDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/contracts/$contractId",
+  component: function ContractDetailRoute() {
+    return <ContractDetailPage contractId={contractDetailRoute.useParams().contractId} />;
+  },
+});
+const bankRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/bank",
+  validateSearch: (raw: Record<string, unknown>): { connection?: string; error?: string } => ({
+    ...(typeof raw.connection === "string" && raw.connection ? { connection: raw.connection } : {}),
+    ...(typeof raw.error === "string" && raw.error ? { error: raw.error } : {}),
+  }),
+  component: function BankRoute() {
+    const { connection, error } = bankRoute.useSearch();
+    return <BankPage connection={connection} error={error} />;
+  },
+});
+const budgetsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/budgets",
+  validateSearch: (raw: Record<string, unknown>): { month?: string } =>
+    isMonthKey(raw.month) ? { month: raw.month } : {},
+  component: function BudgetsRoute() {
+    const { month } = budgetsRoute.useSearch();
+    return <BudgetsPage month={month ?? currentMonthKey()} />;
+  },
+});
 const categoriesRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/categories",
@@ -119,6 +157,10 @@ const routeTree = rootRoute.addChildren([
     accountsRoute,
     accountDetailRoute,
     transactionsRoute,
+    contractsRoute,
+    contractDetailRoute,
+    budgetsRoute,
+    bankRoute,
     categoriesRoute,
     importRoute,
     moreRoute,

@@ -3,10 +3,13 @@
 Self-hosted household finance app: accounts, categories, contracts and budgets for one household with
 several members. Runs as a Docker Compose stack, published through Cloudflare Tunnel behind Cloudflare Access.
 
-Status: **Phase 1** – accounts (shared or private), CSV import with bank presets and duplicate detection,
-two-level categories with rules that learn from corrections, transaction list with splits, tags and transfer
-pairing, dashboard. Built on Phase 0: login (password + TOTP, passkeys), households with invites, Cloudflare
-Access check, deployment stack, CI. Bank sync (Enable Banking) and contracts follow in Phase 2.
+Status: **Phase 2** – automatic bank sync through Enable Banking (PSD2 consent per member, hourly fetch,
+same rules and transfer pairing as CSV imports), contracts detected from recurring payments with
+cancellation deadlines, price changes and a cancellation letter, monthly budgets per category, "frei
+verfügbar" on the dashboard and in-app notifications. Built on Phase 1 (accounts, CSV import with bank
+presets and duplicate detection, categories with learning rules, transactions with splits, tags and transfer
+pairing, dashboard) and Phase 0 (login with password + TOTP or passkeys, households with invites,
+Cloudflare Access check, deployment stack, CI).
 
 ## Quick start (development)
 

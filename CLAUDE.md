@@ -9,8 +9,9 @@ Deployed with Docker Compose on a Proxmox VM, reachable through Cloudflare Tunne
 - `backend/` – Python 3.13, FastAPI, SQLAlchemy 2 (sync), Alembic, Procrastinate (job queue in Postgres)
   - `app/api/` routers, `app/models/` ORM models, `app/security/` crypto, TOTP, Cloudflare Access
   - `app/sessions.py` server-side sessions (cookie `fa_session`), `app/deps.py` auth dependencies
-  - `app/finance/` ledger logic: `access.py` (account/transaction visibility, the only place that decides it), rules, transfers, dedupe, reporting, importer
+  - `app/finance/` ledger logic: `access.py` (visibility of accounts, transactions and contracts, the only place that decides it), rules, transfers, dedupe, reporting, importer, contracts (detection and payment matching), budgets, available-to-spend, notifications
   - `app/importing/` pure CSV parsing (presets, header auto-mapping), no database access
+  - `app/banking/` Enable Banking client, response mapping and the sync that feeds new rows through the same pipeline as a CSV import
   - `app/worker.py` background tasks, `app/cli.py` admin commands
 - `frontend/` – React 19, Vite, TypeScript, TanStack Router + Query, Tailwind CSS 4, shadcn-style components
   - `src/api/schema.d.ts` is generated from the backend OpenAPI schema; never edit by hand
@@ -36,7 +37,7 @@ After changing API routes or schemas, regenerate the client types (CI fails othe
 - Dates in the UI: `TT.MM.JJJJ` via `src/lib/format.ts`. UI text is German, code and comments English.
 - API error `detail` strings are English; the frontend maps status codes to German messages.
 - Every household-scoped query filters by the caller's household (`CurrentMember`). Add an isolation test for new endpoints.
-- Private accounts are visible only to their owner: go through `app.finance.access` for accounts and transactions; hidden ids return 404.
+- Private accounts are visible only to their owner: go through `app.finance.access` for accounts, transactions and contracts; hidden ids return 404. Bank connections are private to the member who created them.
 - Security-relevant actions write to `audit_log` via `app.sessions.audit`. Never log transaction contents.
 - Settings come from `FA_*` env vars or files in `/run/secrets` (see `app/config.py`).
 - Requests that end in an error roll back; commit explicitly first if a side effect must persist (see `_register_failure`).

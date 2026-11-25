@@ -52,6 +52,17 @@ class Settings(BaseSettings):
     # Use the Cf-Connecting-IP header as client IP (only behind the tunnel).
     trust_cf_connecting_ip: bool = False
 
+    # Enable Banking (automatic bank sync). Optional: without both values the bank endpoints answer 503.
+    enablebanking_app_id: str | None = None
+    # PEM private key of the application; as Docker secret: /run/secrets/fa_enablebanking_private_key
+    enablebanking_private_key: SecretStr | None = None
+    enablebanking_api_base: str = "https://api.enablebanking.com"
+
+    @property
+    def bank_sync_enabled(self) -> bool:
+        key = self.enablebanking_private_key
+        return bool(self.enablebanking_app_id and key and key.get_secret_value().strip())
+
     @model_validator(mode="after")
     def _check_cf_access(self) -> Self:
         if self.cf_access_enabled and not (self.cf_access_team_domain and self.cf_access_aud):

@@ -1,16 +1,18 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Landmark, Tag } from "lucide-react";
+import { ChevronRight, Landmark, Tag } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { AccountKind, Dashboard } from "@/api/client";
 import { dashboardQuery, meQuery } from "@/api/queries";
 import { CategoryIconTile } from "@/components/category-badge";
+import { AvailableTile, BudgetsCard, SuggestionsBanner, UpcomingCard } from "@/components/dashboard-planning";
+import { MonthSwitcher } from "@/components/month-switcher";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { ACCOUNT_KIND_ICON } from "@/lib/accounts";
 import { categoryColor } from "@/lib/categories";
-import { addMonths, monthLabel, shortMonthLabel } from "@/lib/dates";
+import { monthLabel, shortMonthLabel } from "@/lib/dates";
 import { formatMoney, formatSignedMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -29,34 +31,6 @@ function Kpi({ label, cents, tone }: { label: string; cents: number; tone?: "pos
         {formatSignedMoney(cents)}
       </p>
     </Card>
-  );
-}
-
-function MonthSwitcher({ month }: { month: string }) {
-  const navigate = useNavigate();
-  const go = (next: string) => void navigate({ to: "/", search: { month: next } });
-  return (
-    <div className="flex items-center gap-1">
-      <Button
-        variant="secondary"
-        size="icon"
-        onClick={() => go(addMonths(month, -1))}
-        aria-label="Vorheriger Monat"
-      >
-        <ChevronLeft aria-hidden />
-      </Button>
-      <p className="min-w-36 text-center text-sm font-medium" aria-live="polite">
-        {monthLabel(month)}
-      </p>
-      <Button
-        variant="secondary"
-        size="icon"
-        onClick={() => go(addMonths(month, 1))}
-        aria-label="Nächster Monat"
-      >
-        <ChevronRight aria-hidden />
-      </Button>
-    </div>
   );
 }
 
@@ -201,6 +175,7 @@ function TrendChart({ data }: { data: Dashboard }) {
 }
 
 export function DashboardPage({ month }: Props) {
+  const navigate = useNavigate();
   const { data: me } = useSuspenseQuery(meQuery);
   const { data } = useSuspenseQuery(dashboardQuery(month));
   if (!me) return null;
@@ -210,7 +185,10 @@ export function DashboardPage({ month }: Props) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Übersicht</h1>
-        <MonthSwitcher month={month} />
+        <MonthSwitcher
+          month={month}
+          onChange={(next) => void navigate({ to: "/", search: { month: next } })}
+        />
       </div>
 
       {unprotected && (
@@ -248,7 +226,10 @@ export function DashboardPage({ month }: Props) {
             </Link>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <SuggestionsBanner />
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <AvailableTile />
             <Kpi label="Einnahmen" cents={data.income_cents} tone="positive" />
             <Kpi label="Ausgaben" cents={-data.expense_cents} />
             <Kpi label="Saldo" cents={data.net_cents} tone="positive" />
@@ -257,6 +238,8 @@ export function DashboardPage({ month }: Props) {
           <div className="grid gap-4 lg:grid-cols-2">
             <AccountsCard data={data} />
             <TopCategories data={data} />
+            <BudgetsCard month={month} />
+            <UpcomingCard />
           </div>
           <TrendChart data={data} />
         </>

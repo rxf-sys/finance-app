@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Landmark, Plus, Upload } from "lucide-react";
 import { useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { bankConnectionsQuery } from "@/api/bank-queries";
 import type { Account } from "@/api/client";
 import { accountsQuery, balanceHistoryQuery } from "@/api/queries";
 import { AccountActions } from "@/components/account-actions";
@@ -14,12 +15,13 @@ import { ACCOUNT_KIND_ICON, ACCOUNT_KIND_LABEL, formatIban, VISIBILITY_LABEL } f
 import { monthLabel, shortMonthLabel } from "@/lib/dates";
 import { formatDate } from "@/lib/format";
 import { formatMoney } from "@/lib/money";
+import { formatRelativeTime } from "@/lib/relative-time";
 
 function VisibilityBadge({ account }: { account: Account }) {
   return <Badge>{VISIBILITY_LABEL[account.visibility]}</Badge>;
 }
 
-function AccountRow({ account }: { account: Account }) {
+function AccountRow({ account, bankSync }: { account: Account; bankSync?: { lastSyncAt: string | null } }) {
   const Icon = ACCOUNT_KIND_ICON[account.kind];
   return (
     <li className={`flex items-center gap-2 px-3 py-3 sm:px-4 ${account.is_archived ? "opacity-70" : ""}`}>
@@ -36,10 +38,12 @@ function AccountRow({ account }: { account: Account }) {
             <span className="truncate text-sm font-medium">{account.name}</span>
             <VisibilityBadge account={account} />
             {account.is_archived && <Badge>Archiviert</Badge>}
+            {bankSync && <Badge>Bankabruf</Badge>}
           </span>
           <span className="block truncate text-xs text-text-muted">
             {ACCOUNT_KIND_LABEL[account.kind]}
             {account.iban ? ` · ${formatIban(account.iban)}` : ""}
+            {bankSync?.lastSyncAt ? ` · Abruf ${formatRelativeTime(bankSync.lastSyncAt)}` : ""}
           </span>
         </span>
         <span className="text-right text-sm font-medium tabular-nums">
@@ -61,6 +65,12 @@ function AccountRow({ account }: { account: Account }) {
 export function AccountsPage() {
   const { data: accounts } = useSuspenseQuery(accountsQuery);
   const [creating, setCreating] = useState(false);
+  const { data: bank } = useQuery(bankConnectionsQuery);
+  const bankSync = new Map(
+    (bank?.configured ? bank.connections : []).flatMap((c) =>
+      c.accounts.map((a) => [a.account_id, { lastSyncAt: c.last_sync_at }] as const),
+    ),
+  );
   const active = accounts.filter((a) => !a.is_archived);
   const archived = accounts.filter((a) => a.is_archived);
 
@@ -84,7 +94,7 @@ export function AccountsPage() {
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
           {[...active, ...archived].map((account) => (
-            <AccountRow key={account.id} account={account} />
+            <AccountRow key={account.id} account={account} bankSync={bankSync.get(account.id)} />
           ))}
         </ul>
       )}

@@ -76,6 +76,59 @@ docker compose exec -T db pg_restore --list < backups/restore-test.dump | head
 
 Zusätzlich einen Proxmox-Backup-Job für die ganze VM anlegen.
 
+## Bankabruf mit Enable Banking einrichten
+
+Optional. Ohne diese Einrichtung antworten alle `/api/bank-connections`-Endpunkte mit 503 „Bank sync is not configured“,
+die App läuft normal weiter (CSV-Import bleibt).
+
+1. Im [Enable-Banking-Control-Panel](https://enablebanking.com/cp/applications) eine Anwendung anlegen
+   (Umgebung *Production*). Den privaten Schlüssel im Browser erzeugen lassen und als PEM herunterladen;
+   die angezeigte *Application ID* notieren.
+2. **Redirect-URL** der Anwendung eintragen, exakt (HTTPS, siehe `FA_PUBLIC_ORIGIN`):
+   `https://finanzen.rxf-sys.de/api/bank-connections/callback`
+3. Schlüssel als Secret ablegen (die Datei nicht committen, `secrets/` ist ignoriert):
+
+   ```sh
+   cp ~/Downloads/<application-id>.pem secrets/fa_enablebanking_private_key
+   chmod 644 secrets/fa_enablebanking_private_key
+   ```
+
+   Die Application ID kommt in `.env`: `FA_ENABLEBANKING_APP_ID=<application-id>`.
+4. In `compose.yaml` ergänzen (api und worker brauchen beides, beide haben bereits Zugang zum `edge`-Netz):
+
+   ```yaml
+   x-app-env: &app-env
+     # ... bestehende Einträge ...
+     FA_ENABLEBANKING_APP_ID: ${FA_ENABLEBANKING_APP_ID:-}
+
+   x-app-secrets: &app-secrets
+     - fa_db_password
+     - fa_encryption_key
+     - fa_enablebanking_private_key
+
+   secrets:
+     fa_enablebanking_private_key:
+       file: ./secrets/fa_enablebanking_private_key
+   ```
+
+   Danach `docker compose up -d`. Weitere Einstellungen (optional): `FA_ENABLEBANKING_API_BASE`
+   (Standard `https://api.enablebanking.com`). Statt der Secret-Datei geht auch `FA_ENABLEBANKING_PRIVATE_KEY`
+   mit dem PEM-Inhalt, das ist für Produktion aber nicht empfohlen.
+5. **Eingeschränkter Modus (restricted mode):** Eine nicht vertraglich aktivierte Anwendung darf nur Konten
+   abrufen, die im Control Panel mit der Anwendung *verknüpft* wurden („Activate by linking accounts“).
+   Jedes Konto, das du in der App verbinden willst, musst du daher zuerst dort verknüpfen und beim Bank
+   autorisieren; ein nicht verknüpftes Konto liefert in der App keine Umsätze. Das gilt auch für Konten
+   weiterer Haushaltsmitglieder (ungeklärt, ob diese selbst verknüpfen dürfen: im Zweifel macht es der Inhaber der Anwendung).
+6. In der App unter *Bank* die Bank wählen und die Freigabe erteilen. Danach die Konten mit lokalen Konten
+   verknüpfen. Für ein Konto mit CSV-Historie startet der Abruf standardmäßig am Tag nach der letzten Buchung,
+   sonst 90 Tage zurück; das Datum lässt sich beim Verknüpfen ändern.
+
+**Abruflimit:** Viele Banken erlauben nur etwa **4 automatische Abrufe pro Tag** ohne Anwesenheit des Nutzers.
+Der Worker ruft deshalb stündlich nur Verbindungen ab, deren letzter Abruf mehr als 6 Stunden zurückliegt
+(sieben Tage Überlappung gegen Nachbuchungen). Der manuelle Abruf ist auf einmal pro 15 Minuten begrenzt.
+Meldet die Bank ein Limit (429), versucht der Worker es später erneut. Die Freigabe läuft je nach Bank nach
+höchstens 90 bis 180 Tagen ab; dann erscheint eine Benachrichtigung und die Verbindung muss erneuert werden.
+
 ## Updates
 
 ```sh
