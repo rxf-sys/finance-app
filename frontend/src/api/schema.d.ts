@@ -346,6 +346,143 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bank-connections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Connections */
+        get: operations["list_connections_api_bank_connections_get"];
+        put?: never;
+        /** Start Connection */
+        post: operations["start_connection_api_bank_connections_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bank-connections/aspsps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Aspsps */
+        get: operations["list_aspsps_api_bank_connections_aspsps_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bank-connections/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Callback */
+        get: operations["callback_api_bank_connections_callback_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bank-connections/{connection_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Connection */
+        delete: operations["delete_connection_api_bank_connections__connection_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bank-connections/{connection_id}/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Provider Accounts */
+        get: operations["provider_accounts_api_bank_connections__connection_id__accounts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bank-connections/{connection_id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Link Account */
+        post: operations["link_account_api_bank_connections__connection_id__link_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bank-connections/{connection_id}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Sync */
+        post: operations["request_sync_api_bank_connections__connection_id__sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bank-connections/{connection_id}/sync-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sync Runs */
+        get: operations["list_sync_runs_api_bank_connections__connection_id__sync_runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/budgets": {
         parameters: {
             query?: never;
@@ -1182,6 +1319,15 @@ export interface components {
             /** Filename */
             filename: string;
         };
+        /** AspspOut */
+        AspspOut: {
+            /** Country */
+            country: string;
+            /** Logo */
+            logo?: string | null;
+            /** Name */
+            name: string;
+        };
         /** AvailableItem */
         AvailableItem: {
             /** Amount Cents */
@@ -1219,6 +1365,11 @@ export interface components {
             /** Month */
             month: string;
         };
+        /**
+         * BankConnectionStatus
+         * @enum {string}
+         */
+        BankConnectionStatus: "pending" | "active" | "expired" | "revoked" | "error";
         /** BudgetCreate */
         BudgetCreate: {
             /** Amount Cents */
@@ -1379,6 +1530,44 @@ export interface components {
             sign_column?: string | null;
             /** Value Date */
             value_date?: string | null;
+        };
+        /** ConnectionCreate */
+        ConnectionCreate: {
+            /** Aspsp Name */
+            aspsp_name: string;
+            /** Country */
+            country: string;
+        };
+        /** ConnectionOut */
+        ConnectionOut: {
+            /** Accounts */
+            accounts: components["schemas"]["LinkedAccountOut"][];
+            /** Aspsp Name */
+            aspsp_name: string;
+            /** Consent Valid Until */
+            consent_valid_until: string | null;
+            /** Country */
+            country: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Sync At */
+            last_sync_at: string | null;
+            status: components["schemas"]["BankConnectionStatus"];
+        };
+        /** ConnectionStarted */
+        ConnectionStarted: {
+            /**
+             * Connection Id
+             * Format: uuid
+             */
+            connection_id: string;
+            /** Redirect Url To Bank */
+            redirect_url_to_bank: string;
         };
         /** ContractCreate */
         ContractCreate: {
@@ -1832,6 +2021,41 @@ export interface components {
             /** Monthly Cost Cents */
             monthly_cost_cents: number;
         };
+        /** LinkOut */
+        LinkOut: {
+            /**
+             * Account Id
+             * Format: uuid
+             */
+            account_id: string;
+            /**
+             * Sync From
+             * Format: date
+             */
+            sync_from: string;
+        };
+        /** LinkRequest */
+        LinkRequest: {
+            /** Account Id */
+            account_id?: string | null;
+            new_account?: components["schemas"]["NewAccount"] | null;
+            /** Provider Account Uid */
+            provider_account_uid: string;
+            /** Sync From */
+            sync_from?: string | null;
+        };
+        /** LinkedAccountOut */
+        LinkedAccountOut: {
+            /**
+             * Account Id
+             * Format: uuid
+             */
+            account_id: string;
+            /** Name */
+            name: string;
+            /** Provider Account Uid */
+            provider_account_uid: string | null;
+        };
         /** LoginRequest */
         LoginRequest: {
             /** Email */
@@ -1888,6 +2112,15 @@ export interface components {
             user_id: string;
         };
         NameOrNames: string | string[];
+        /** NewAccount */
+        NewAccount: {
+            /** @default giro */
+            kind: components["schemas"]["AccountKind"];
+            /** Name */
+            name: string;
+            /** @default shared */
+            visibility: components["schemas"]["AccountVisibility"];
+        };
         /**
          * NotificationKind
          * @enum {string}
@@ -2076,6 +2309,19 @@ export interface components {
             /** Name */
             name?: string | null;
         };
+        /** ProviderAccountOut */
+        ProviderAccountOut: {
+            /** Currency */
+            currency: string | null;
+            /** Iban Masked */
+            iban_masked: string | null;
+            /** Linked Account Id */
+            linked_account_id: string | null;
+            /** Name */
+            name: string | null;
+            /** Uid */
+            uid: string;
+        };
         /** ReadAllResult */
         ReadAllResult: {
             /** Updated */
@@ -2203,6 +2449,43 @@ export interface components {
             /** Position */
             position: number;
         };
+        /** SyncQueued */
+        SyncQueued: {
+            /**
+             * Status
+             * @default queued
+             */
+            status: string;
+        };
+        /** SyncRunOut */
+        SyncRunOut: {
+            /** Account Id */
+            account_id: string | null;
+            /** Error */
+            error: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Rows Duplicate */
+            rows_duplicate: number;
+            /** Rows New */
+            rows_new: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            status: components["schemas"]["SyncStatus"];
+        };
+        /**
+         * SyncStatus
+         * @enum {string}
+         */
+        SyncStatus: "completed" | "failed";
         /** TagOut */
         TagOut: {
             /**
@@ -3233,6 +3516,306 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AvailableOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_connections_api_bank_connections_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_connection_api_bank_connections_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectionCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionStarted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_aspsps_api_bank_connections_aspsps_get: {
+        parameters: {
+            query?: {
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AspspOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    callback_api_bank_connections_callback_get: {
+        parameters: {
+            query?: {
+                code?: string | null;
+                state?: string | null;
+                error?: string | null;
+                retry?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_connection_api_bank_connections__connection_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                connection_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    provider_accounts_api_bank_connections__connection_id__accounts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                connection_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderAccountOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    link_account_api_bank_connections__connection_id__link_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                connection_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_sync_api_bank_connections__connection_id__sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                connection_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncQueued"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sync_runs_api_bank_connections__connection_id__sync_runs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                connection_id: string;
+            };
+            cookie?: {
+                fa_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncRunOut"][];
                 };
             };
             /** @description Validation Error */

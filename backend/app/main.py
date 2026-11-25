@@ -6,6 +6,7 @@ from app.api import (
     accounts,
     auth,
     available,
+    banking,
     budgets,
     categories,
     contracts,
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
         budgets.router,
         available.router,
         notifications.router,
+        banking.router,
     ):
         protected.include_router(router)
     api.include_router(protected)

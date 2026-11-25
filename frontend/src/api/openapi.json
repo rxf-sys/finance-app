@@ -338,6 +338,35 @@
         "title": "AnalyzeRequest",
         "type": "object"
       },
+      "AspspOut": {
+        "properties": {
+          "country": {
+            "title": "Country",
+            "type": "string"
+          },
+          "logo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "country"
+        ],
+        "title": "AspspOut",
+        "type": "object"
+      },
       "AvailableItem": {
         "properties": {
           "amount_cents": {
@@ -421,6 +450,17 @@
         ],
         "title": "BalancePoint",
         "type": "object"
+      },
+      "BankConnectionStatus": {
+        "enum": [
+          "pending",
+          "active",
+          "expired",
+          "revoked",
+          "error"
+        ],
+        "title": "BankConnectionStatus",
+        "type": "string"
       },
       "BudgetCreate": {
         "properties": {
@@ -939,6 +979,121 @@
           "booking_date"
         ],
         "title": "ColumnMap",
+        "type": "object"
+      },
+      "ConnectionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "aspsp_name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Aspsp Name",
+            "type": "string"
+          },
+          "country": {
+            "pattern": "^[A-Z]{2}$",
+            "title": "Country",
+            "type": "string"
+          }
+        },
+        "required": [
+          "aspsp_name",
+          "country"
+        ],
+        "title": "ConnectionCreate",
+        "type": "object"
+      },
+      "ConnectionOut": {
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/LinkedAccountOut"
+            },
+            "title": "Accounts",
+            "type": "array"
+          },
+          "aspsp_name": {
+            "title": "Aspsp Name",
+            "type": "string"
+          },
+          "consent_valid_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent Valid Until"
+          },
+          "country": {
+            "title": "Country",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "last_sync_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Sync At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BankConnectionStatus"
+          }
+        },
+        "required": [
+          "id",
+          "aspsp_name",
+          "country",
+          "status",
+          "consent_valid_until",
+          "last_sync_at",
+          "last_error",
+          "accounts"
+        ],
+        "title": "ConnectionOut",
+        "type": "object"
+      },
+      "ConnectionStarted": {
+        "properties": {
+          "connection_id": {
+            "format": "uuid",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "redirect_url_to_bank": {
+            "title": "Redirect Url To Bank",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id",
+          "redirect_url_to_bank"
+        ],
+        "title": "ConnectionStarted",
         "type": "object"
       },
       "ContractCreate": {
@@ -2388,6 +2543,107 @@
         "title": "KindSummary",
         "type": "object"
       },
+      "LinkOut": {
+        "properties": {
+          "account_id": {
+            "format": "uuid",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "sync_from": {
+            "format": "date",
+            "title": "Sync From",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "sync_from"
+        ],
+        "title": "LinkOut",
+        "type": "object"
+      },
+      "LinkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "account_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id"
+          },
+          "new_account": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NewAccount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider_account_uid": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Provider Account Uid",
+            "type": "string"
+          },
+          "sync_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync From"
+          }
+        },
+        "required": [
+          "provider_account_uid"
+        ],
+        "title": "LinkRequest",
+        "type": "object"
+      },
+      "LinkedAccountOut": {
+        "properties": {
+          "account_id": {
+            "format": "uuid",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "provider_account_uid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Account Uid"
+          }
+        },
+        "required": [
+          "account_id",
+          "name",
+          "provider_account_uid"
+        ],
+        "title": "LinkedAccountOut",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -2552,6 +2808,30 @@
             "type": "array"
           }
         ]
+      },
+      "NewAccount": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/AccountKind",
+            "default": "giro"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AccountVisibility",
+            "default": "shared"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "NewAccount",
+        "type": "object"
       },
       "NotificationKind": {
         "enum": [
@@ -3046,6 +3326,68 @@
         "title": "ProfileUpdate",
         "type": "object"
       },
+      "ProviderAccountOut": {
+        "properties": {
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "iban_masked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban Masked"
+          },
+          "linked_account_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Linked Account Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "uid": {
+            "title": "Uid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uid",
+          "iban_masked",
+          "name",
+          "currency",
+          "linked_account_id"
+        ],
+        "title": "ProviderAccountOut",
+        "type": "object"
+      },
       "ReadAllResult": {
         "properties": {
           "updated": {
@@ -3434,6 +3776,97 @@
         ],
         "title": "SplitOut",
         "type": "object"
+      },
+      "SyncQueued": {
+        "properties": {
+          "status": {
+            "default": "queued",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "SyncQueued",
+        "type": "object"
+      },
+      "SyncRunOut": {
+        "properties": {
+          "account_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "rows_duplicate": {
+            "title": "Rows Duplicate",
+            "type": "integer"
+          },
+          "rows_new": {
+            "title": "Rows New",
+            "type": "integer"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncStatus"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "status",
+          "started_at",
+          "finished_at",
+          "rows_new",
+          "rows_duplicate",
+          "error"
+        ],
+        "title": "SyncRunOut",
+        "type": "object"
+      },
+      "SyncStatus": {
+        "enum": [
+          "completed",
+          "failed"
+        ],
+        "title": "SyncStatus",
+        "type": "string"
       },
       "TagOut": {
         "properties": {
@@ -5634,6 +6067,581 @@
         "summary": "Get Available",
         "tags": [
           "available"
+        ]
+      }
+    },
+    "/api/bank-connections": {
+      "get": {
+        "operationId": "list_connections_api_bank_connections_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConnectionOut"
+                  },
+                  "title": "Response List Connections Api Bank Connections Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Connections",
+        "tags": [
+          "bank"
+        ]
+      },
+      "post": {
+        "operationId": "start_connection_api_bank_connections_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionStarted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Connection",
+        "tags": [
+          "bank"
+        ]
+      }
+    },
+    "/api/bank-connections/aspsps": {
+      "get": {
+        "operationId": "list_aspsps_api_bank_connections_aspsps_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "default": "DE",
+              "pattern": "^[A-Z]{2}$",
+              "title": "Country",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AspspOut"
+                  },
+                  "title": "Response List Aspsps Api Bank Connections Aspsps Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Aspsps",
+        "tags": [
+          "bank"
+        ]
+      }
+    },
+    "/api/bank-connections/callback": {
+      "get": {
+        "operationId": "callback_api_bank_connections_callback_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "error",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error"
+            }
+          },
+          {
+            "in": "query",
+            "name": "retry",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Retry"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Callback",
+        "tags": [
+          "bank"
+        ]
+      }
+    },
+    "/api/bank-connections/{connection_id}": {
+      "delete": {
+        "operationId": "delete_connection_api_bank_connections__connection_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Connection",
+        "tags": [
+          "bank"
+        ]
+      }
+    },
+    "/api/bank-connections/{connection_id}/accounts": {
+      "get": {
+        "operationId": "provider_accounts_api_bank_connections__connection_id__accounts_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderAccountOut"
+                  },
+                  "title": "Response Provider Accounts Api Bank Connections  Connection Id  Accounts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Provider Accounts",
+        "tags": [
+          "bank"
+        ]
+      }
+    },
+    "/api/bank-connections/{connection_id}/link": {
+      "post": {
+        "operationId": "link_account_api_bank_connections__connection_id__link_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Link Account",
+        "tags": [
+          "bank"
+        ]
+      }
+    },
+    "/api/bank-connections/{connection_id}/sync": {
+      "post": {
+        "operationId": "request_sync_api_bank_connections__connection_id__sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncQueued"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request Sync",
+        "tags": [
+          "bank"
+        ]
+      }
+    },
+    "/api/bank-connections/{connection_id}/sync-runs": {
+      "get": {
+        "operationId": "list_sync_runs_api_bank_connections__connection_id__sync_runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SyncRunOut"
+                  },
+                  "title": "Response List Sync Runs Api Bank Connections  Connection Id  Sync Runs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Sync Runs",
+        "tags": [
+          "bank"
         ]
       }
     },
