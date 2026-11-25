@@ -49,7 +49,7 @@ describe("push service worker", () => {
     await worker.dispatch("push", { data: { text: () => "Hallo" } });
 
     expect(worker.showNotification).toHaveBeenCalledWith(
-      "Finanzen",
+      "Orynthia Finance",
       expect.objectContaining({ body: "Hallo" }),
     );
   });
