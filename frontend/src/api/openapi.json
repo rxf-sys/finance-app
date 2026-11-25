@@ -59,6 +59,10 @@
             "title": "Balance Cents",
             "type": "integer"
           },
+          "bank_linked": {
+            "title": "Bank Linked",
+            "type": "boolean"
+          },
           "currency": {
             "title": "Currency",
             "type": "string"
@@ -143,7 +147,8 @@
           "owner_user_id",
           "is_mine",
           "transaction_count",
-          "last_booking_date"
+          "last_booking_date",
+          "bank_linked"
         ],
         "title": "AccountOut",
         "type": "object"

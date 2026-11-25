@@ -84,8 +84,3 @@ export function filterAspsps(banks: Aspsp[], query: string): Aspsp[] {
   if (!needle) return banks;
   return banks.filter((bank) => bank.name.toLocaleLowerCase("de").includes(needle));
 }
-
-/** Ids of the accounts that already have a bank link, over all given connections. */
-export function linkedAccountIds(connections: BankConnection[]): Set<string> {
-  return new Set(connections.flatMap((c) => c.accounts.map((a) => a.account_id)));
-}

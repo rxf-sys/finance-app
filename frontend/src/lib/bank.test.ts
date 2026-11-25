@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  type BankConnection,
   bankErrorMessage,
   canReconnect,
   consentTone,
   filterAspsps,
   formatRetryAfter,
-  linkedAccountIds,
   parseRetryAfter,
   storedErrorText,
 } from "./bank";
@@ -74,13 +72,6 @@ describe("helpers", () => {
     ];
     expect(filterAspsps(banks, "  spar").map((b) => b.name)).toEqual(["Sparkasse Köln"]);
     expect(filterAspsps(banks, "")).toHaveLength(2);
-  });
-  it("collects linked account ids", () => {
-    const connections = [
-      { accounts: [{ account_id: "a", name: "A", provider_account_uid: "x" }] },
-      { accounts: [{ account_id: "b", name: "B", provider_account_uid: null }] },
-    ] as BankConnection[];
-    expect([...linkedAccountIds(connections)].sort()).toEqual(["a", "b"]);
   });
 });
 

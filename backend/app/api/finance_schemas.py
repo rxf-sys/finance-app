@@ -63,6 +63,7 @@ class AccountOut(BaseModel):
     is_mine: bool
     transaction_count: int
     last_booking_date: date | None
+    bank_linked: bool
 
 
 class BalancePoint(BaseModel):

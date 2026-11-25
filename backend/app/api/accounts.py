@@ -35,6 +35,7 @@ def _out(stats: reporting.AccountStats, member: MemberContext) -> schemas.Accoun
         is_mine=account.owner_user_id == member.user.id,
         transaction_count=stats.transaction_count,
         last_booking_date=stats.last_booking_date,
+        bank_linked=account.bank_connection_id is not None,
     )
 
 

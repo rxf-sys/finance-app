@@ -334,6 +334,19 @@ def test_link_existing_account_checks_iban(world: World, bank: FakeBank, db: Ses
     assert listed[0]["linked_account_id"] == str(unset.id)
 
 
+def test_account_out_reports_bank_link(world: World, bank: FakeBank, db: Session) -> None:
+    connection_id = connect(world.owner, bank)
+    plain = make_account(db, world.owner_user, "Ohne Bank")
+    unset = make_account(db, world.owner_user, "Mit Bank")
+    assert link(world.owner, connection_id, account_id=str(unset.id)).status_code == 200
+
+    flags = {a["id"]: a["bank_linked"] for a in world.owner.get("/api/accounts").json()}
+    assert flags == {str(plain.id): False, str(unset.id): True}
+    # Visible to a household member too, who cannot see the (private) connection itself.
+    seen_by_member = {a["id"]: a["bank_linked"] for a in world.member.get("/api/accounts").json()}
+    assert seen_by_member[str(unset.id)] is True
+
+
 def test_link_requires_exactly_one_target(world: World, bank: FakeBank) -> None:
     connection_id = connect(world.owner, bank)
     assert link(world.owner, connection_id).status_code == 422
