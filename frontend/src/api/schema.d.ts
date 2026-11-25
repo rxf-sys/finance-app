@@ -2095,15 +2095,27 @@ export interface components {
             /** Uncategorized Count */
             uncategorized_count: number;
         };
-        /** ForecastAssumptions */
+        /**
+         * ForecastAssumptions
+         * @description Baselines are medians over the complete months used; both are positive magnitudes.
+         */
         ForecastAssumptions: {
-            /** Income Baseline Cents */
+            /**
+             * Income Baseline Cents
+             * @description Expected monthly income, positive
+             */
             income_baseline_cents: number;
-            /** Income Day */
+            /**
+             * Income Day
+             * @description Typical day of month of the largest credit
+             */
             income_day: number | null;
             /** Months Used */
             months_used: number;
-            /** Variable Baseline Cents */
+            /**
+             * Variable Baseline Cents
+             * @description Expected monthly variable spending as a positive amount; month rows carry it negative
+             */
             variable_baseline_cents: number;
         };
         /** ForecastDay */

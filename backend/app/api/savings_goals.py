@@ -164,6 +164,8 @@ def add_contribution(
         raise HTTPException(
             status.HTTP_409_CONFLICT, "Goals linked to an account take their progress from its balance"
         )
+    if goal.archived_at is not None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Goal is archived")
     if body.booked_on > today_berlin():
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "booked_on must not be in the future")
     goal.contributions.append(

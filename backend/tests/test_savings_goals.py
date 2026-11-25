@@ -155,6 +155,9 @@ def test_contributions(world: World) -> None:
     assert deleted.json()["percent"] == 0
     assert deleted.json()["remaining_cents"] == 55_000
 
+    assert world.owner.patch(base, json={"archived": True}).status_code == 200
+    assert post(amount_cents=100, booked_on=today.isoformat()).status_code == 409
+
 
 def test_private_goal_visibility_and_isolation(world: World, db: Session) -> None:
     goal = _create(world.owner, visibility="private").json()

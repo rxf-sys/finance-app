@@ -2388,8 +2388,10 @@
         "type": "object"
       },
       "ForecastAssumptions": {
+        "description": "Baselines are medians over the complete months used; both are positive magnitudes.",
         "properties": {
           "income_baseline_cents": {
+            "description": "Expected monthly income, positive",
             "title": "Income Baseline Cents",
             "type": "integer"
           },
@@ -2402,6 +2404,7 @@
                 "type": "null"
               }
             ],
+            "description": "Typical day of month of the largest credit",
             "title": "Income Day"
           },
           "months_used": {
@@ -2409,6 +2412,7 @@
             "type": "integer"
           },
           "variable_baseline_cents": {
+            "description": "Expected monthly variable spending as a positive amount; month rows carry it negative",
             "title": "Variable Baseline Cents",
             "type": "integer"
           }

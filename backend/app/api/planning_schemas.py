@@ -300,9 +300,13 @@ class ForecastEventOut(BaseModel):
 
 
 class ForecastAssumptions(BaseModel):
-    income_baseline_cents: int
-    income_day: int | None
-    variable_baseline_cents: int
+    """Baselines are medians over the complete months used; both are positive magnitudes."""
+
+    income_baseline_cents: int = Field(description="Expected monthly income, positive")
+    income_day: int | None = Field(description="Typical day of month of the largest credit")
+    variable_baseline_cents: int = Field(
+        description="Expected monthly variable spending as a positive amount; month rows carry it negative"
+    )
     months_used: int
 
 
