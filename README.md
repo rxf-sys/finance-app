@@ -23,6 +23,8 @@ uv sync
 export FA_DB_PASSWORD=devpass FA_COOKIE_SECURE=false FA_ENCRYPTION_KEY="$(uv run python -m app.cli generate-key)"
 uv run alembic upgrade head
 uv run python -m app.cli create-owner --email you@example.com --name "Your Name" --household "Zuhause"
+# or, on an empty database: a fictional demo household (demo@example.org) for trying it out
+# uv run python -m app.cli seed-demo
 uv run uvicorn app.main:app --reload               # API on :8000, docs on /api/docs
 
 cd ../frontend

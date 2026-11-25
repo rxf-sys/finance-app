@@ -25,6 +25,7 @@ Backend (in `backend/`):
 - `uv sync` · `uv run pytest` (needs Docker for testcontainers) · `uv run ruff format . && uv run ruff check .` · `uv run mypy app tests`
 - Dev server: `docker compose -f ../compose.dev.yaml up -d`, then with `FA_DB_PASSWORD=devpass FA_ENCRYPTION_KEY=<key> FA_COOKIE_SECURE=false`: `uv run alembic upgrade head && uv run uvicorn app.main:app --reload`
 - New migration: `uv run alembic revision --autogenerate -m "..."`, then review the file
+- Demo data for screenshots (empty database only, refuses otherwise): `uv run python -m app.cli seed-demo`; fictional names and example IBANs, see `app/demo.py`
 
 Frontend (in `frontend/`):
 - `pnpm install` · `pnpm dev` (proxies `/api` to :8000) · `pnpm check` · `pnpm typecheck` · `pnpm test` · `pnpm build`
