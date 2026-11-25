@@ -36,6 +36,9 @@ pnpm dev                                           # UI on http://localhost:5173
 
 See [docs/deployment.md](docs/deployment.md) for the Proxmox VM, Cloudflare Tunnel and Access setup.
 
+More documentation: [architecture](docs/architecture.md), [decisions (ADRs)](docs/adr/),
+[roadmap](docs/roadmap.md), [design and contrast](docs/design.md).
+
 ## Security model
 
 1. Cloudflare Access in front of the whole host (allow-list of household e-mails).
