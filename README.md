@@ -1,5 +1,7 @@
 # finance-app
 
+> **Status:** In development (phase 3 in code, not in production yet) · planned product name **Orynthia Finance** · **As of:** 2026-11-25 · Part of my [portfolio](https://portfolio.rxf-sys.de/#projects)
+
 Self-hosted household finance app: accounts, categories, contracts and budgets for one household with
 several members. Runs as a Docker Compose stack, published through Cloudflare Tunnel behind Cloudflare Access.
 
