@@ -17,6 +17,7 @@ from app.api import (
     household,
     imports,
     notifications,
+    push,
     reports,
     rules,
     savings_goals,
@@ -59,6 +60,7 @@ def create_app() -> FastAPI:
         reports.router,
         savings_goals.router,
         notifications.router,
+        push.router,
         banking.router,
     ):
         protected.include_router(router)
