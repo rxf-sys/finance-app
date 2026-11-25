@@ -1,0 +1,140 @@
+"""The single place that decides which accounts and transactions a household member may see.
+
+An account is visible when it belongs to the member's household and is either shared or owned by
+the member. A transaction is visible iff its account is. A contract is visible when it belongs to the
+household and has no account or a visible one. A savings goal is visible when it is shared or owned
+by the member, and its account (if any) is visible. A category rule is visible when it has no
+account condition or its account is visible. Anything else is reported as 404, never 403, so
+ids of hidden rows do not leak.
+"""
+
+import uuid
+
+from fastapi import HTTPException, status
+from sqlalchemy import ColumnElement, String, and_, cast, or_, select
+from sqlalchemy.orm import Session, selectinload
+
+from app.deps import MemberContext
+from app.models import (
+    Account,
+    AccountVisibility,
+    CategoryRule,
+    Contract,
+    HouseholdMember,
+    SavingsGoal,
+    Transaction,
+)
+
+
+def visible_account_clause(member: MemberContext) -> ColumnElement[bool]:
+    return and_(
+        Account.household_id == member.household.id,
+        or_(Account.visibility == AccountVisibility.SHARED, Account.owner_user_id == member.user.id),
+    )
+
+
+def visible_transaction_clause(member: MemberContext) -> ColumnElement[bool]:
+    """Transaction-level filter: same household and a visible account."""
+    return and_(
+        Transaction.household_id == member.household.id,
+        Transaction.account_id.in_(select(Account.id).where(visible_account_clause(member))),
+    )
+
+
+def get_visible_account(db: Session, member: MemberContext, account_id: uuid.UUID) -> Account:
+    account = db.scalar(select(Account).where(Account.id == account_id, visible_account_clause(member)))
+    if account is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Account not found")
+    return account
+
+
+def get_visible_transaction(db: Session, member: MemberContext, transaction_id: uuid.UUID) -> Transaction:
+    transaction = db.scalar(
+        select(Transaction)
+        .where(Transaction.id == transaction_id, visible_transaction_clause(member))
+        .options(
+            selectinload(Transaction.splits),
+            selectinload(Transaction.tags),
+            selectinload(Transaction.category),
+        )
+    )
+    if transaction is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Transaction not found")
+    return transaction
+
+
+def visible_contract_clause(member: MemberContext) -> ColumnElement[bool]:
+    """Contract-level filter: same household, and either household-wide or on a visible account."""
+    return and_(
+        Contract.household_id == member.household.id,
+        or_(
+            Contract.account_id.is_(None),
+            Contract.account_id.in_(select(Account.id).where(visible_account_clause(member))),
+        ),
+    )
+
+
+def get_visible_contract(db: Session, member: MemberContext, contract_id: uuid.UUID) -> Contract:
+    contract = db.scalar(select(Contract).where(Contract.id == contract_id, visible_contract_clause(member)))
+    if contract is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Contract not found")
+    return contract
+
+
+def visible_goal_clause(member: MemberContext) -> ColumnElement[bool]:
+    """Savings-goal filter: same household, shared or own, and no account or a visible one."""
+    return and_(
+        SavingsGoal.household_id == member.household.id,
+        or_(SavingsGoal.visibility == AccountVisibility.SHARED, SavingsGoal.owner_user_id == member.user.id),
+        or_(
+            SavingsGoal.account_id.is_(None),
+            SavingsGoal.account_id.in_(select(Account.id).where(visible_account_clause(member))),
+        ),
+    )
+
+
+def get_visible_goal(db: Session, member: MemberContext, goal_id: uuid.UUID) -> SavingsGoal:
+    goal = db.scalar(select(SavingsGoal).where(SavingsGoal.id == goal_id, visible_goal_clause(member)))
+    if goal is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Savings goal not found")
+    return goal
+
+
+def visible_rule_clause(member: MemberContext) -> ColumnElement[bool]:
+    """Rule filter: same household, and no account condition or one on a visible account.
+
+    Conditions of a rule on a private account (counterparty names, amounts) describe that
+    account's bookings, so they are as private as the account.
+    """
+    rule_account = CategoryRule.conditions["account_id"].astext
+    return and_(
+        CategoryRule.household_id == member.household.id,
+        or_(
+            rule_account.is_(None),
+            rule_account.in_(select(cast(Account.id, String)).where(visible_account_clause(member))),
+        ),
+    )
+
+
+def get_visible_rule(db: Session, member: MemberContext, rule_id: uuid.UUID) -> CategoryRule:
+    rule = db.scalar(select(CategoryRule).where(CategoryRule.id == rule_id, visible_rule_clause(member)))
+    if rule is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Rule not found")
+    return rule
+
+
+def account_audience(db: Session, household_id: uuid.UUID, account_id: uuid.UUID | None) -> list[uuid.UUID]:
+    """User ids of the household members who can see an account (everybody when there is none).
+
+    Mirrors `visible_account_clause` for background jobs that have no acting member.
+    """
+    members = select(HouseholdMember.user_id).where(HouseholdMember.household_id == household_id)
+    if account_id is not None:
+        account = db.scalar(
+            select(Account).where(Account.id == account_id, Account.household_id == household_id)
+        )
+        if account is None:
+            return []
+        if account.visibility is AccountVisibility.PRIVATE:
+            members = members.where(HouseholdMember.user_id == account.owner_user_id)
+    return list(db.scalars(members.order_by(HouseholdMember.user_id)))

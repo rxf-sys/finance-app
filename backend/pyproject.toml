@@ -9,6 +9,7 @@ dependencies = [
     "cryptography>=50.0.2",
     "fastapi>=0.165.0",
     "httpx>=0.28.1",
+    "openpyxl>=3.1.5",
     "procrastinate>=3.12.0",
     "psycopg[binary]>=3.3.9",
     "pydantic>=2.14.4",
@@ -53,7 +54,7 @@ plugins = ["pydantic.mypy"]
 exclude = ["alembic/versions/"]
 
 [[tool.mypy.overrides]]
-module = ["procrastinate.*", "testcontainers.*", "factory.*"]
+module = ["procrastinate.*", "testcontainers.*", "factory.*", "openpyxl.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

@@ -3,7 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import cli
-from app.models import AuditLog, HouseholdRole, User
+from app.models import AuditLog, Category, HouseholdRole, User
+from app.security.webpush import VapidKey
 
 
 def test_create_owner_creates_household_and_audit_entry(db: Session, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -21,6 +22,19 @@ def test_create_owner_creates_household_and_audit_entry(db: Session, monkeypatch
     assert user.membership.role is HouseholdRole.OWNER
     assert user.membership.household.name == "Zuhause"
     assert db.scalar(select(AuditLog.action).where(AuditLog.user_id == user.id)) == "owner_created_cli"
+
+
+def test_create_owner_seeds_default_categories(db: Session, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(cli, "_read_new_password", lambda: "owner passphrase 2026")
+
+    cli.main(["create-owner", "--email", "robin@example.com", "--name", "Robin", "--household", "Zuhause"])
+
+    user = db.scalar(select(User).where(User.email == "robin@example.com"))
+    assert user is not None and user.membership is not None
+    names = set(
+        db.scalars(select(Category.name).where(Category.household_id == user.membership.household_id))
+    )
+    assert {"Einnahmen", "Wohnen", "Umbuchung", "Gehalt", "Eigene Konten"} <= names
 
 
 def test_create_owner_refuses_duplicates(db: Session, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -44,3 +58,11 @@ def test_reset_totp_clears_secret_and_lock(db: Session, monkeypatch: pytest.Monk
 
     db.expire_all()
     assert user.totp_secret_encrypted is None and user.failed_login_count == 0
+
+
+def test_generate_vapid_key_prints_loadable_pem(capsys: pytest.CaptureFixture[str]) -> None:
+    assert cli.main(["generate-vapid-key"]) == 0
+
+    pem = capsys.readouterr().out
+    assert pem.startswith("-----BEGIN PRIVATE KEY-----")
+    assert len(VapidKey.from_pem(pem).public_key) == 87

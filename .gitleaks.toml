@@ -1,0 +1,14 @@
+# Gitleaks (CI job "secrets"): the default rules plus verified false positives.
+# Add an entry only with a reason; never allowlist a whole file or directory.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Verified false positives"
+regexes = [
+  # Auth secret of the public example in RFC 8291, section 5 (test vector in tests/test_webpush.py).
+  '''^BTBZMqHH6r4Tts7J_aSIgg$''',
+  # The generic-api-key rule reads the next keyword argument name as a value in
+  # `vapid_private_key=key, vapid_subject="mailto:..."` (tests/test_push.py).
+  '''^vapid_subject=$''',
+]

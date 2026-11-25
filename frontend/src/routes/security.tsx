@@ -4,6 +4,7 @@ import { type FormEvent, useState } from "react";
 import { ApiError, api, unwrap } from "@/api/client";
 import { meQuery, passkeysQuery } from "@/api/queries";
 import { FormField } from "@/components/form-field";
+import { PushCard } from "@/components/push-card";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -305,6 +306,7 @@ export function SecurityPage() {
       <PasskeySection />
       <TotpSection enabled={Boolean(me?.has_totp)} />
       <PasswordSection />
+      <PushCard />
     </div>
   );
 }

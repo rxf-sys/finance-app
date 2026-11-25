@@ -52,6 +52,42 @@ class Settings(BaseSettings):
     # Use the Cf-Connecting-IP header as client IP (only behind the tunnel).
     trust_cf_connecting_ip: bool = False
 
+    # Enable Banking (automatic bank sync). Optional: without both values the bank endpoints answer 503.
+    enablebanking_app_id: str | None = None
+    # PEM private key of the application; as Docker secret: /run/secrets/fa_enablebanking_private_key
+    enablebanking_private_key: SecretStr | None = None
+    enablebanking_api_base: str = "https://api.enablebanking.com"
+
+    @property
+    def bank_sync_enabled(self) -> bool:
+        key = self.enablebanking_private_key
+        return bool(self.enablebanking_app_id and key and key.get_secret_value().strip())
+
+    # Web Push (VAPID). Optional: without a key and a subject the push endpoints answer 503.
+    # PEM private key; as Docker secret: /run/secrets/fa_vapid_private_key
+    vapid_private_key: SecretStr | None = None
+    # "mailto:..." or "https://..."; defaults to the public origin when that is https.
+    vapid_subject: str | None = None
+
+    @property
+    def resolved_vapid_subject(self) -> str | None:
+        if self.vapid_subject:
+            return self.vapid_subject
+        if self.public_origin.startswith("https://"):
+            return self.public_origin
+        return None
+
+    @property
+    def push_enabled(self) -> bool:
+        key = self.vapid_private_key
+        return bool(key and key.get_secret_value().strip() and self.resolved_vapid_subject)
+
+    @model_validator(mode="after")
+    def _check_vapid_subject(self) -> Self:
+        if self.vapid_subject and not self.vapid_subject.startswith(("mailto:", "https://")):
+            raise ValueError("FA_VAPID_SUBJECT must start with mailto: or https://")
+        return self
+
     @model_validator(mode="after")
     def _check_cf_access(self) -> Self:
         if self.cf_access_enabled and not (self.cf_access_team_domain and self.cf_access_aud):
