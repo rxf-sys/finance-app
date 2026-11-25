@@ -138,7 +138,10 @@ def list_transactions(
         )
         where.append(or_(and_(~_has_splits(), Transaction.category_id.in_(matching)), in_split))
     if uncategorized:
-        where.append(and_(Transaction.category_id.is_(None), ~_has_splits()))
+        # Same definition as the dashboard count: paired transfers need no category.
+        where.append(
+            and_(Transaction.category_id.is_(None), Transaction.transfer_peer_id.is_(None), ~_has_splits())
+        )
     if date_from is not None:
         where.append(Transaction.booking_date >= date_from)
     if date_to is not None:

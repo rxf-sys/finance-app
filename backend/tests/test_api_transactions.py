@@ -152,6 +152,20 @@ def test_list_ties_on_booking_date_are_stable(world: World) -> None:
     assert paged == first
 
 
+def test_uncategorized_filter_skips_paired_transfers(world: World) -> None:
+    giro = _account(world.owner, "Giro")
+    savings = _account(world.owner, "Tagesgeld")
+    out = _tx(world.owner, giro, -5000, "2026-03-01")
+    into = _tx(world.owner, savings, 5000, "2026-03-01")
+    loose = _tx(world.owner, giro, -700, "2026-03-02")
+    paired = world.owner.post(f"{TX}/{out['id']}/transfer", json={"peer_id": into["id"]})
+    assert paired.status_code == 200, paired.text
+
+    listed = set(_ids(world.owner.get(TX, params={"uncategorized": "true"})))
+    assert listed == {loose["id"]}
+    assert world.owner.get("/api/dashboard", params={"month": "2026-03"}).json()["uncategorized_count"] == 1
+
+
 def test_list_filters(world: World) -> None:
     giro = _account(world.owner, "Giro")
     card = _account(world.owner, "Karte")
