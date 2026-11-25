@@ -21,6 +21,7 @@ from app.banking.sync import SESSION_CONTEXT, sync_connection, sync_due_connecti
 from app.config import Settings, get_settings
 from app.models import (
     Account,
+    AccountVisibility,
     AuditLog,
     BankConnection,
     BankConnectionStatus,
@@ -460,6 +461,19 @@ def test_sync_applies_rules_and_pairs_transfers(
     db.expire_all()
     synced = db.scalars(select(Transaction).where(Transaction.account_id == account.id)).one()
     assert synced.transfer_peer_id is not None
+
+
+def test_sync_does_not_pair_with_accounts_hidden_from_the_owner(
+    world: World, bank: FakeBank, db: Session, settings: Settings
+) -> None:
+    connection_id, account = _linked(world, bank, db)
+    hidden = make_account(db, world.member_user, "Privat", visibility=AccountVisibility.PRIVATE, iban=IBAN_B)
+    make_tx(db, hidden, 10000, booking_date=TODAY - timedelta(days=1), counterparty_iban=IBAN_A)
+    bank.transactions = [tx("t1", "100.00", 1, creditor={"name": "Ich"}, creditor_account={"iban": IBAN_B})]
+    _sync(db, bank, settings, connection_id)
+    db.expire_all()
+    synced = db.scalars(select(Transaction).where(Transaction.account_id == account.id)).one()
+    assert synced.transfer_peer_id is None
 
 
 def test_sync_detects_and_matches_contracts(

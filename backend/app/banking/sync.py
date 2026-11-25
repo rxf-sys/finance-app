@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.banking.client import BankAuthExpired, BankError, BankRateLimited, EnableBankingClient
 from app.banking.mapping import MappedTransaction, map_transaction, provider_dedupe_hash
 from app.config import Settings, get_settings
+from app.deps import MemberContext
 from app.finance.contracts import detect_contracts, match_payments
 from app.finance.dedupe import compute_dedupe_hash
 from app.finance.normalize import normalize_text
@@ -34,6 +35,7 @@ from app.models import (
     SyncRun,
     SyncStatus,
     Transaction,
+    User,
 )
 from app.models.base import utcnow
 from app.security.crypto import SecretBox
@@ -117,12 +119,33 @@ def _existing(db: Session, account: Account, hashes: Sequence[str]) -> set[str]:
     return found
 
 
-def _after_ingest(db: Session, household_id: uuid.UUID, new_transactions: Sequence[Transaction]) -> None:
-    """Everything that runs on freshly fetched rows, in the same order as a CSV import."""
+def _owner_context(db: Session, connection: BankConnection) -> MemberContext | None:
+    """The connection owner as a household member, or None once they left or were deleted."""
+    if connection.owner_user_id is None:
+        return None
+    user = db.get(User, connection.owner_user_id)
+    membership = user.membership if user is not None else None
+    if user is None or membership is None or membership.household_id != connection.household_id:
+        return None
+    return MemberContext(user, membership.household, membership.role)
+
+
+def _after_ingest(
+    db: Session,
+    household_id: uuid.UUID,
+    new_transactions: Sequence[Transaction],
+    owner: MemberContext | None,
+) -> None:
+    """Everything that runs on freshly fetched rows, in the same order as a CSV import.
+
+    Transfers are paired only with accounts the connection owner can see, like an import by them;
+    without an owner nothing is paired.
+    """
     if not new_transactions:
         return
     apply_rules(db, household_id, new_transactions)
-    detect_transfers(db, household_id, new_transactions)
+    if owner is not None:
+        detect_transfers(db, household_id, new_transactions, member=owner)
     match_payments(db, household_id, new_transactions)
     detect_contracts(db, household_id, account_ids={t.account_id for t in new_transactions})
     db.flush()
@@ -228,10 +251,11 @@ def sync_connection(
     own_client = client is None
     if client is None:
         client = EnableBankingClient.from_settings(settings)
+    owner = _owner_context(db, connection)
     failed = False
     try:
         for account in accounts:
-            outcome = _sync_account(db, connection, account, client, today=today)
+            outcome = _sync_account(db, connection, account, client, owner, today=today)
             failed = failed or outcome != "ok"
             if outcome == "stop":
                 break
@@ -244,7 +268,13 @@ def sync_connection(
 
 
 def _sync_account(
-    db: Session, connection: BankConnection, account: Account, client: EnableBankingClient, *, today: date
+    db: Session,
+    connection: BankConnection,
+    account: Account,
+    client: EnableBankingClient,
+    owner: MemberContext | None,
+    *,
+    today: date,
 ) -> Outcome:
     """Sync one account. "stop" means the other accounts of the connection should not be tried."""
     started = utcnow()
@@ -263,7 +293,7 @@ def _sync_account(
             from_date = _start_date(db, account, today)
             raw = client.get_transactions(account.provider_account_uid, from_date)
             new, duplicates = _ingest(db, account, raw)
-            _after_ingest(db, account.household_id, new)
+            _after_ingest(db, account.household_id, new, owner)
         run.rows_new, run.rows_duplicate = len(new), duplicates
     except BankAuthExpired:
         run.status, run.error = SyncStatus.FAILED, ERR_EXPIRED
