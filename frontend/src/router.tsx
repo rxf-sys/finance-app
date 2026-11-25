@@ -9,6 +9,7 @@ import {
 import { meQuery } from "@/api/queries";
 import { AppShell } from "@/components/app-shell";
 import { currentMonthKey, isMonthKey } from "@/lib/dates";
+import { parseForecastMonths } from "@/lib/forecast";
 import { validateTransactionSearch } from "@/lib/transaction-search";
 import { AccountDetailPage, AccountsPage } from "@/routes/accounts";
 import { BankPage } from "@/routes/bank";
@@ -17,11 +18,14 @@ import { CategoriesPage } from "@/routes/categories";
 import { ContractDetailPage } from "@/routes/contract-detail";
 import { ContractsPage } from "@/routes/contracts";
 import { DashboardPage } from "@/routes/dashboard";
+import { ForecastPage } from "@/routes/forecast";
+import { GoalsPage } from "@/routes/goals";
 import { HouseholdPage } from "@/routes/household";
 import { ImportPage } from "@/routes/import";
 import { InvitePage } from "@/routes/invite";
 import { LoginPage } from "@/routes/login";
 import { MorePage } from "@/routes/more";
+import { ReportsPage } from "@/routes/reports";
 import { SecurityPage } from "@/routes/security";
 import { TransactionsPage } from "@/routes/transactions";
 
@@ -123,6 +127,28 @@ const budgetsRoute = createRoute({
     return <BudgetsPage month={month ?? currentMonthKey()} />;
   },
 });
+const forecastRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/forecast",
+  validateSearch: (raw: Record<string, unknown>): { months?: 1 | 2 | 3 } =>
+    raw.months === undefined ? {} : { months: parseForecastMonths(raw.months) },
+  component: function ForecastRoute() {
+    return <ForecastPage months={parseForecastMonths(forecastRoute.useSearch().months)} />;
+  },
+});
+const goalsRoute = createRoute({ getParentRoute: () => appRoute, path: "/goals", component: GoalsPage });
+const reportsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/reports",
+  validateSearch: (raw: Record<string, unknown>): { year?: number } => {
+    const year = Number(raw.year);
+    return Number.isInteger(year) && year >= 2000 && year <= 2100 ? { year } : {};
+  },
+  component: function ReportsRoute() {
+    const { year } = reportsRoute.useSearch();
+    return <ReportsPage year={year ?? new Date().getFullYear()} />;
+  },
+});
 const categoriesRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/categories",
@@ -160,6 +186,9 @@ const routeTree = rootRoute.addChildren([
     contractsRoute,
     contractDetailRoute,
     budgetsRoute,
+    forecastRoute,
+    goalsRoute,
+    reportsRoute,
     bankRoute,
     categoriesRoute,
     importRoute,
