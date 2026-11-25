@@ -4,7 +4,7 @@ import json
 import logging
 import uuid
 from collections.abc import Iterator
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -20,7 +20,7 @@ from app.api import push as push_api
 from app.config import Settings, get_settings
 from app.models import AuditLog, Notification, NotificationKind, PushSubscription, User
 from app.models.base import utcnow
-from app.push import Outcome, build_payload, dispatch_pending, send
+from app.push import Outcome, build_payload, dispatch_pending, in_quiet_hours, send
 from app.security.webpush import MAX_PLAINTEXT, VapidKey, b64url_encode
 from tests.helpers import World, decrypt_push, raw_public
 
@@ -405,6 +405,50 @@ def test_build_payload_fits_one_record_and_keeps_unicode() -> None:
 def _handled(db: Session, notice: Notification) -> bool:
     db.refresh(notice)
     return notice.push_handled_at is not None
+
+
+@pytest.mark.parametrize(
+    ("utc", "quiet"),
+    [
+        (datetime(2026, 11, 25, 20, 59, tzinfo=UTC), False),  # 21:59 CET
+        (datetime(2026, 11, 25, 21, 0, tzinfo=UTC), True),  # 22:00 CET
+        (datetime(2026, 11, 26, 2, 0, tzinfo=UTC), True),  # 03:00 CET
+        (datetime(2026, 11, 26, 5, 59, tzinfo=UTC), True),  # 06:59 CET
+        (datetime(2026, 11, 26, 6, 0, tzinfo=UTC), False),  # 07:00 CET
+        (datetime(2026, 7, 1, 19, 59, tzinfo=UTC), False),  # 21:59 CEST
+        (datetime(2026, 7, 1, 20, 0, tzinfo=UTC), True),  # 22:00 CEST
+        (datetime(2026, 7, 2, 5, 0, tzinfo=UTC), False),  # 07:00 CEST
+    ],
+)
+def test_quiet_hours_are_22_to_7_berlin_time(utc: datetime, quiet: bool) -> None:
+    assert in_quiet_hours(utc) is quiet
+
+
+def test_dispatch_waits_during_quiet_hours(
+    world: World, settings: Settings, service: FakePushService, db: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _add_sub(db, world.owner_user, Receiver(FCM + "/fcm/send/phone"))
+    notice = _add_notice(db, world.owner_user)
+    monkeypatch.setattr(push, "in_quiet_hours", lambda _moment: True)
+
+    assert dispatch_pending(settings).sent == 0
+    assert service.requests == []
+    assert not _handled(db, notice)
+
+    monkeypatch.setattr(push, "in_quiet_hours", lambda _moment: False)
+    assert dispatch_pending(settings).sent == 1
+    assert _handled(db, notice)
+
+
+def test_dispatch_without_push_marks_handled_even_at_night(
+    world: World, db: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    notice = _add_notice(db, world.owner_user)
+    monkeypatch.setattr(push, "in_quiet_hours", lambda _moment: True)
+
+    dispatch_pending(get_settings())
+
+    assert _handled(db, notice)
 
 
 def test_dispatch_sends_notice_to_its_users_devices_only(

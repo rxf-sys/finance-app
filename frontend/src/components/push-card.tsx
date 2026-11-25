@@ -55,6 +55,7 @@ export function PushCardView({ state, busy = false, error, testResult, onToggle,
       <CardTitle>Push-Benachrichtigungen</CardTitle>
       <CardDescription>
         Kündigungsfristen, Budgetwarnungen und Hinweise direkt aufs Gerät, auch wenn die App geschlossen ist.
+        Zwischen 22 und 7 Uhr ist Ruhe, Hinweise aus der Nacht kommen morgens.
       </CardDescription>
       {state.kind === "ready" && (
         <div className="mt-4 space-y-3">
