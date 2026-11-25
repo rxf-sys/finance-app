@@ -1,9 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, Landmark, Link2, PiggyBank, ShieldCheck, Tags, Upload, Users } from "lucide-react";
+import {
+  ChevronRight,
+  Landmark,
+  LineChart,
+  Link2,
+  PiggyBank,
+  ShieldCheck,
+  Tags,
+  Target,
+  TrendingUp,
+  Upload,
+  Users,
+} from "lucide-react";
 
 const ITEMS = [
   { to: "/accounts", label: "Konten", description: "Konten und Kontostände", icon: Landmark },
   { to: "/budgets", label: "Budgets", description: "Monatslimits je Kategorie", icon: PiggyBank },
+  { to: "/forecast", label: "Prognose", description: "Kontostand der nächsten Monate", icon: TrendingUp },
+  { to: "/goals", label: "Sparziele", description: "Rücklagen und Fortschritt", icon: Target },
+  { to: "/reports", label: "Berichte", description: "Jahresübersicht und Export", icon: LineChart },
   { to: "/bank", label: "Bankverbindungen", description: "Konten per Bankabruf aktuell halten", icon: Link2 },
   { to: "/import", label: "Import", description: "Kontoauszug als CSV einlesen", icon: Upload },
   {

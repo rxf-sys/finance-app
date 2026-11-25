@@ -9,7 +9,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from app.deps import MemberContext
-from app.finance.reporting import _is_transfer, add_months, effective_lines
+from app.finance.reporting import add_months, effective_lines, is_transfer
 from app.models import Budget, Category
 
 WARNING_PCT = 80
@@ -44,7 +44,7 @@ def _spent_by_budget(db: Session, member: MemberContext, month: date) -> dict[uu
             (Budget.household_id == member.household.id)
             & or_(Budget.category_id == category.id, Budget.category_id == category.parent_id),
         )
-        .where(lines.c.amount_cents < 0, ~_is_transfer(lines, category))
+        .where(lines.c.amount_cents < 0, ~is_transfer(lines, category))
         .group_by(Budget.id)
     )
     return {budget_id: int(total) for budget_id, total in rows}

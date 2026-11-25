@@ -57,7 +57,7 @@ def parse_month(value: str) -> date:
 def effective_lines(
     member: MemberContext, date_from: date | None = None, date_to: date | None = None
 ) -> Subquery:
-    """Columns: transaction_id, account_id, booking_date, amount_cents, category_id, is_paired.
+    """Columns: transaction_id, account_id, booking_date, amount_cents, category_id, is_paired, contract_id.
 
     `date_to` is exclusive. Splits replace their parent transaction.
     """
@@ -78,6 +78,7 @@ def effective_lines(
         Transaction.amount_cents.label("amount_cents"),
         Transaction.category_id.label("category_id"),
         Transaction.transfer_peer_id.is_not(None).label("is_paired"),
+        Transaction.contract_id.label("contract_id"),
     ).where(
         visible,
         ~exists().where(TransactionSplit.transaction_id == Transaction.id),
@@ -91,6 +92,7 @@ def effective_lines(
             TransactionSplit.amount_cents.label("amount_cents"),
             TransactionSplit.category_id.label("category_id"),
             Transaction.transfer_peer_id.is_not(None).label("is_paired"),
+            Transaction.contract_id.label("contract_id"),
         )
         .join(Transaction, Transaction.id == TransactionSplit.transaction_id)
         .where(visible, *bounds())
@@ -98,7 +100,7 @@ def effective_lines(
     return union_all(unsplit, split).subquery("lines")
 
 
-def _is_transfer(lines: Subquery, category: type[Category]) -> ColumnElement[bool]:
+def is_transfer(lines: Subquery, category: type[Category]) -> ColumnElement[bool]:
     in_transfer_category = case((category.kind == CategoryKind.TRANSFER, True), else_=False)
     return lines.c.is_paired | in_transfer_category
 
@@ -177,7 +179,7 @@ def monthly_flows(db: Session, member: MemberContext, first: date, last: date) -
     """(month, income_cents, expense_cents) for every month from `first` to `last` inclusive."""
     lines = effective_lines(member, first, add_months(last, 1))
     category = aliased(Category)
-    counted = ~_is_transfer(lines, category)
+    counted = ~is_transfer(lines, category)
     month_expr = func.to_char(lines.c.booking_date, "YYYY-MM")
     income = func.coalesce(
         func.sum(case((and_(counted, lines.c.amount_cents > 0), lines.c.amount_cents), else_=0)), 0
@@ -225,7 +227,7 @@ def top_expense_categories(
                 top, top.id == func.coalesce(category.parent_id, category.id)
             )
         )
-        .where(lines.c.amount_cents < 0, ~_is_transfer(lines, category))
+        .where(lines.c.amount_cents < 0, ~is_transfer(lines, category))
         .group_by(top.id, top.name, top.icon, top.color)
         .order_by(amount.desc(), top.name)
         .limit(limit)

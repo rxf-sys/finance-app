@@ -2,8 +2,9 @@
 
 An account is visible when it belongs to the member's household and is either shared or owned by
 the member. A transaction is visible iff its account is. A contract is visible when it belongs to the
-household and has no account or a visible one. Anything else is reported as 404, never
-403, so ids of hidden rows do not leak.
+household and has no account or a visible one. A savings goal is visible when it is shared or owned
+by the member, and its account (if any) is visible. Anything else is reported as 404, never 403, so
+ids of hidden rows do not leak.
 """
 
 import uuid
@@ -13,7 +14,7 @@ from sqlalchemy import ColumnElement, and_, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.deps import MemberContext
-from app.models import Account, AccountVisibility, Contract, HouseholdMember, Transaction
+from app.models import Account, AccountVisibility, Contract, HouseholdMember, SavingsGoal, Transaction
 
 
 def visible_account_clause(member: MemberContext) -> ColumnElement[bool]:
@@ -69,6 +70,25 @@ def get_visible_contract(db: Session, member: MemberContext, contract_id: uuid.U
     if contract is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Contract not found")
     return contract
+
+
+def visible_goal_clause(member: MemberContext) -> ColumnElement[bool]:
+    """Savings-goal filter: same household, shared or own, and no account or a visible one."""
+    return and_(
+        SavingsGoal.household_id == member.household.id,
+        or_(SavingsGoal.visibility == AccountVisibility.SHARED, SavingsGoal.owner_user_id == member.user.id),
+        or_(
+            SavingsGoal.account_id.is_(None),
+            SavingsGoal.account_id.in_(select(Account.id).where(visible_account_clause(member))),
+        ),
+    )
+
+
+def get_visible_goal(db: Session, member: MemberContext, goal_id: uuid.UUID) -> SavingsGoal:
+    goal = db.scalar(select(SavingsGoal).where(SavingsGoal.id == goal_id, visible_goal_clause(member)))
+    if goal is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Savings goal not found")
+    return goal
 
 
 def account_audience(db: Session, household_id: uuid.UUID, account_id: uuid.UUID | None) -> list[uuid.UUID]:

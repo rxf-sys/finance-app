@@ -1,20 +1,48 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, CircleHelp, Lightbulb } from "lucide-react";
+import { ChevronRight, CircleHelp, Lightbulb, TrendingUp } from "lucide-react";
 import {
   availableQuery,
   budgetStatusQuery,
   contractSummaryQuery,
   contractsQuery,
+  forecastQuery,
 } from "@/api/planning-queries";
 import { Amount } from "@/components/amount";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { mostCritical } from "@/lib/budgets";
 import { daysUntil, deadlineDistance, kindIcon } from "@/lib/contracts";
+import { summarize } from "@/lib/forecast";
 import { formatDate } from "@/lib/format";
 import { formatMoney, formatSignedMoney } from "@/lib/money";
 import { BudgetRow } from "@/routes/budgets";
+
+/** Projected balance at the end of the one-month forecast; links to the full forecast. */
+export function ForecastTile() {
+  const { data } = useQuery(forecastQuery(1));
+  if (!data) return <Card className="p-4 text-sm text-text-muted">Kontostand in 30 Tagen …</Card>;
+  const summary = summarize(data);
+  return (
+    <Link
+      to="/forecast"
+      className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 hover:bg-surface-muted"
+    >
+      <TrendingUp className="size-5 shrink-0 text-text-muted" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm text-text-muted">Kontostand in 30 Tagen</span>
+        <span className="block text-lg font-semibold tabular-nums">
+          {formatMoney(summary.endBalanceCents)}
+        </span>
+        <span className="block text-xs text-text-muted">
+          Prognose für den {formatDate(summary.endDate)}
+          {data.insufficient_history ? ", bisher nur mit Verträgen" : ""}
+        </span>
+      </span>
+      <ChevronRight className="size-4 text-text-muted" aria-hidden />
+    </Link>
+  );
+}
 
 /** "Frei verfügbar" tile; the popover explains where the number comes from. */
 export function AvailableTile() {

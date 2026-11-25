@@ -35,6 +35,12 @@ export type PriceChange = Schemas["PriceChangeOut"];
 export type BudgetStatus = Schemas["BudgetStatusOut"];
 export type Available = Schemas["AvailableOut"];
 export type AppNotification = Schemas["NotificationOut"];
+export type Goal = Schemas["GoalOut"];
+export type Contribution = Schemas["ContributionOut"];
+export type Forecast = Schemas["ForecastOut"];
+export type YearReport = Schemas["YearReportOut"];
+export type CategoryReport = Schemas["CategoryReportOut"];
+export type CategoryReportRow = Schemas["CategoryRowOut"];
 
 export const api = createClient<paths>({ baseUrl: "/", credentials: "same-origin" });
 

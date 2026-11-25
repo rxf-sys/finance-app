@@ -778,6 +778,134 @@
         "title": "CategoryOut",
         "type": "object"
       },
+      "CategoryReportOut": {
+        "description": "Per top-level category with its children; `uncategorized` has a null id and name.",
+        "properties": {
+          "kind": {
+            "enum": [
+              "expense",
+              "income"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryRowOut"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "total_cents": {
+            "title": "Total Cents",
+            "type": "integer"
+          },
+          "totals_cents": {
+            "description": "Twelve column totals including uncategorized",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Totals Cents",
+            "type": "array"
+          },
+          "uncategorized": {
+            "$ref": "#/components/schemas/CategoryRowOut"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "kind",
+          "rows",
+          "uncategorized",
+          "totals_cents",
+          "total_cents"
+        ],
+        "title": "CategoryReportOut",
+        "type": "object"
+      },
+      "CategoryRowOut": {
+        "properties": {
+          "category_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryRowOut"
+            },
+            "title": "Children",
+            "type": "array"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "months_cents": {
+            "description": "Twelve signed values, January first",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Months Cents",
+            "type": "array"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "total_cents": {
+            "title": "Total Cents",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category_id",
+          "name",
+          "icon",
+          "color",
+          "months_cents",
+          "total_cents",
+          "children"
+        ],
+        "title": "CategoryRowOut",
+        "type": "object"
+      },
       "CategorySource": {
         "enum": [
           "rule",
@@ -1992,6 +2120,84 @@
         "title": "ContractUpdate",
         "type": "object"
       },
+      "ContributionCreate": {
+        "properties": {
+          "amount_cents": {
+            "description": "Signed: negative is a withdrawal; never zero",
+            "maximum": 10000000000000.0,
+            "minimum": -10000000000000.0,
+            "title": "Amount Cents",
+            "type": "integer"
+          },
+          "booked_on": {
+            "description": "Not in the future",
+            "format": "date",
+            "title": "Booked On",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "amount_cents",
+          "booked_on"
+        ],
+        "title": "ContributionCreate",
+        "type": "object"
+      },
+      "ContributionOut": {
+        "properties": {
+          "amount_cents": {
+            "title": "Amount Cents",
+            "type": "integer"
+          },
+          "booked_on": {
+            "format": "date",
+            "title": "Booked On",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "id",
+          "amount_cents",
+          "booked_on",
+          "note",
+          "created_at"
+        ],
+        "title": "ContributionOut",
+        "type": "object"
+      },
       "CsvFormat": {
         "additionalProperties": false,
         "description": "File-level settings plus the column map.",
@@ -2179,6 +2385,595 @@
           "uncategorized_count"
         ],
         "title": "DashboardOut",
+        "type": "object"
+      },
+      "ForecastAssumptions": {
+        "description": "Baselines are medians over the complete months used; both are positive magnitudes.",
+        "properties": {
+          "income_baseline_cents": {
+            "description": "Expected monthly income, positive",
+            "title": "Income Baseline Cents",
+            "type": "integer"
+          },
+          "income_day": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Typical day of month of the largest credit",
+            "title": "Income Day"
+          },
+          "months_used": {
+            "title": "Months Used",
+            "type": "integer"
+          },
+          "variable_baseline_cents": {
+            "description": "Expected monthly variable spending as a positive amount; month rows carry it negative",
+            "title": "Variable Baseline Cents",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "income_baseline_cents",
+          "income_day",
+          "variable_baseline_cents",
+          "months_used"
+        ],
+        "title": "ForecastAssumptions",
+        "type": "object"
+      },
+      "ForecastDay": {
+        "properties": {
+          "balance_cents": {
+            "title": "Balance Cents",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "balance_cents"
+        ],
+        "title": "ForecastDay",
+        "type": "object"
+      },
+      "ForecastEventOut": {
+        "properties": {
+          "amount_cents": {
+            "title": "Amount Cents",
+            "type": "integer"
+          },
+          "contract_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Id"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "contract",
+              "income"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "kind",
+          "name",
+          "amount_cents",
+          "contract_id"
+        ],
+        "title": "ForecastEventOut",
+        "type": "object"
+      },
+      "ForecastMonth": {
+        "properties": {
+          "contracts_cents": {
+            "description": "Signed sum of contract payments in the month",
+            "title": "Contracts Cents",
+            "type": "integer"
+          },
+          "end_balance_cents": {
+            "title": "End Balance Cents",
+            "type": "integer"
+          },
+          "income_cents": {
+            "title": "Income Cents",
+            "type": "integer"
+          },
+          "month": {
+            "title": "Month",
+            "type": "string"
+          },
+          "variable_cents": {
+            "description": "Expected variable spending, negative",
+            "title": "Variable Cents",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "month",
+          "income_cents",
+          "contracts_cents",
+          "variable_cents",
+          "end_balance_cents"
+        ],
+        "title": "ForecastMonth",
+        "type": "object"
+      },
+      "ForecastOut": {
+        "description": "Projected end-of-day balances of the spendable accounts; months cover only days after today.",
+        "properties": {
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "assumptions": {
+            "$ref": "#/components/schemas/ForecastAssumptions"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastDay"
+            },
+            "title": "Daily",
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastEventOut"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "horizon_end": {
+            "format": "date",
+            "title": "Horizon End",
+            "type": "string"
+          },
+          "insufficient_history": {
+            "title": "Insufficient History",
+            "type": "boolean"
+          },
+          "lowest": {
+            "$ref": "#/components/schemas/ForecastDay"
+          },
+          "months": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastMonth"
+            },
+            "title": "Months",
+            "type": "array"
+          },
+          "start_balance_cents": {
+            "title": "Start Balance Cents",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "start_balance_cents",
+          "as_of",
+          "horizon_end",
+          "daily",
+          "months",
+          "lowest",
+          "events",
+          "assumptions",
+          "insufficient_history"
+        ],
+        "title": "ForecastOut",
+        "type": "object"
+      },
+      "GoalCreate": {
+        "properties": {
+          "account_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Progress follows this account's balance; it must be visible to you",
+            "title": "Account Id"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "pattern": "^[a-z0-9-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "pattern": "^[a-z0-9-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "target_cents": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 10000000000000.0,
+            "title": "Target Cents",
+            "type": "integer"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Must be in the future",
+            "title": "Target Date"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AccountVisibility",
+            "default": "shared"
+          }
+        },
+        "required": [
+          "name",
+          "target_cents"
+        ],
+        "title": "GoalCreate",
+        "type": "object"
+      },
+      "GoalOut": {
+        "description": "A savings goal with computed progress.\n\n`contributions` is only filled by the detail, create, patch and contribution endpoints\n(oldest first); the list endpoint returns it empty.",
+        "properties": {
+          "account_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id"
+          },
+          "account_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Name"
+          },
+          "achieved": {
+            "title": "Achieved",
+            "type": "boolean"
+          },
+          "archived": {
+            "title": "Archived",
+            "type": "boolean"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/ContributionOut"
+            },
+            "title": "Contributions",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "monthly_needed_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monthly Needed Cents"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "owner_user_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner User Id"
+          },
+          "percent": {
+            "description": "0 and up; may exceed 100",
+            "title": "Percent",
+            "type": "integer"
+          },
+          "progress_cents": {
+            "title": "Progress Cents",
+            "type": "integer"
+          },
+          "remaining_cents": {
+            "title": "Remaining Cents",
+            "type": "integer"
+          },
+          "target_cents": {
+            "title": "Target Cents",
+            "type": "integer"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AccountVisibility"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "target_cents",
+          "target_date",
+          "account_id",
+          "account_name",
+          "visibility",
+          "owner_user_id",
+          "icon",
+          "color",
+          "note",
+          "archived",
+          "archived_at",
+          "created_at",
+          "progress_cents",
+          "percent",
+          "remaining_cents",
+          "monthly_needed_cents",
+          "achieved",
+          "contributions"
+        ],
+        "title": "GoalOut",
+        "type": "object"
+      },
+      "GoalUpdate": {
+        "description": "Only the fields that are sent change; an explicit null clears the optional ones.",
+        "properties": {
+          "account_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id"
+          },
+          "archived": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "pattern": "^[a-z0-9-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "pattern": "^[a-z0-9-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "target_cents": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 10000000000000.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Cents"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccountVisibility"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "GoalUpdate",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -2794,6 +3589,48 @@
           "joined_at"
         ],
         "title": "Member",
+        "type": "object"
+      },
+      "MonthOut": {
+        "properties": {
+          "expense_cents": {
+            "description": "Negative",
+            "title": "Expense Cents",
+            "type": "integer"
+          },
+          "income_cents": {
+            "title": "Income Cents",
+            "type": "integer"
+          },
+          "month": {
+            "title": "Month",
+            "type": "string"
+          },
+          "saldo_cents": {
+            "title": "Saldo Cents",
+            "type": "integer"
+          },
+          "savings_rate_bp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Saldo / income in basis points; null without income",
+            "title": "Savings Rate Bp"
+          }
+        },
+        "required": [
+          "month",
+          "income_cents",
+          "expense_cents",
+          "saldo_cents",
+          "savings_rate_bp"
+        ],
+        "title": "MonthOut",
         "type": "object"
       },
       "NameOrNames": {
@@ -4971,6 +5808,55 @@
           "options"
         ],
         "title": "WebAuthnOptions",
+        "type": "object"
+      },
+      "YearReportOut": {
+        "properties": {
+          "expense_cents": {
+            "description": "Negative",
+            "title": "Expense Cents",
+            "type": "integer"
+          },
+          "income_cents": {
+            "title": "Income Cents",
+            "type": "integer"
+          },
+          "months": {
+            "items": {
+              "$ref": "#/components/schemas/MonthOut"
+            },
+            "title": "Months",
+            "type": "array"
+          },
+          "saldo_cents": {
+            "title": "Saldo Cents",
+            "type": "integer"
+          },
+          "savings_rate_bp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Savings Rate Bp"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "months",
+          "income_cents",
+          "expense_cents",
+          "saldo_cents",
+          "savings_rate_bp"
+        ],
+        "title": "YearReportOut",
         "type": "object"
       }
     }
@@ -8094,6 +8980,175 @@
         ]
       }
     },
+    "/api/export/transactions": {
+      "get": {
+        "description": "Visible transactions ordered by booking date; split transactions give one row per split.",
+        "operationId": "export_transactions_api_export_transactions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "csv",
+              "enum": [
+                "csv",
+                "xlsx"
+              ],
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Account Id"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Transactions",
+        "tags": [
+          "export"
+        ]
+      }
+    },
+    "/api/forecast": {
+      "get": {
+        "operationId": "get_forecast_api_forecast_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "months",
+            "required": false,
+            "schema": {
+              "default": 3,
+              "maximum": 3,
+              "minimum": 1,
+              "title": "Months",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Forecast",
+        "tags": [
+          "forecast"
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "operationId": "health_api_health_get",
@@ -9141,6 +10196,140 @@
         ]
       }
     },
+    "/api/reports/categories": {
+      "get": {
+        "operationId": "category_report_api_reports_categories_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "maximum": 2100,
+              "minimum": 2000,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "default": "expense",
+              "enum": [
+                "expense",
+                "income"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryReportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Category Report",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/reports/year": {
+      "get": {
+        "operationId": "year_report_api_reports_year_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "maximum": 2100,
+              "minimum": 2000,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearReportOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Year Report",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
     "/api/rules": {
       "get": {
         "operationId": "list_rules_api_rules_get",
@@ -9416,6 +10605,440 @@
         "summary": "Update Rule",
         "tags": [
           "rules"
+        ]
+      }
+    },
+    "/api/savings-goals": {
+      "get": {
+        "operationId": "list_goals_api_savings_goals_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_archived",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Archived",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GoalOut"
+                  },
+                  "title": "Response List Goals Api Savings Goals Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Goals",
+        "tags": [
+          "savings goals"
+        ]
+      },
+      "post": {
+        "operationId": "create_goal_api_savings_goals_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Goal",
+        "tags": [
+          "savings goals"
+        ]
+      }
+    },
+    "/api/savings-goals/{goal_id}": {
+      "delete": {
+        "operationId": "delete_goal_api_savings_goals__goal_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "goal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Goal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Goal",
+        "tags": [
+          "savings goals"
+        ]
+      },
+      "get": {
+        "operationId": "get_goal_api_savings_goals__goal_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "goal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Goal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Goal",
+        "tags": [
+          "savings goals"
+        ]
+      },
+      "patch": {
+        "operationId": "update_goal_api_savings_goals__goal_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "goal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Goal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Goal",
+        "tags": [
+          "savings goals"
+        ]
+      }
+    },
+    "/api/savings-goals/{goal_id}/contributions": {
+      "post": {
+        "operationId": "add_contribution_api_savings_goals__goal_id__contributions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "goal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Goal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContributionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Contribution",
+        "tags": [
+          "savings goals"
+        ]
+      }
+    },
+    "/api/savings-goals/{goal_id}/contributions/{contribution_id}": {
+      "delete": {
+        "operationId": "delete_contribution_api_savings_goals__goal_id__contributions__contribution_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "goal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Goal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "contribution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Contribution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "fa_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fa Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Contribution",
+        "tags": [
+          "savings goals"
         ]
       }
     },

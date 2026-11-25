@@ -5,7 +5,13 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import type { AccountKind, Dashboard } from "@/api/client";
 import { dashboardQuery, meQuery } from "@/api/queries";
 import { CategoryIconTile } from "@/components/category-badge";
-import { AvailableTile, BudgetsCard, SuggestionsBanner, UpcomingCard } from "@/components/dashboard-planning";
+import {
+  AvailableTile,
+  BudgetsCard,
+  ForecastTile,
+  SuggestionsBanner,
+  UpcomingCard,
+} from "@/components/dashboard-planning";
 import { MonthSwitcher } from "@/components/month-switcher";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -234,6 +240,8 @@ export function DashboardPage({ month }: Props) {
             <Kpi label="Ausgaben" cents={-data.expense_cents} />
             <Kpi label="Saldo" cents={data.net_cents} tone="positive" />
           </div>
+
+          <ForecastTile />
 
           <div className="grid gap-4 lg:grid-cols-2">
             <AccountsCard data={data} />

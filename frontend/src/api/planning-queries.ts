@@ -76,3 +76,43 @@ export function invalidateContracts(queryClient: QueryClient): Promise<unknown> 
 export function invalidateBudgets(queryClient: QueryClient): Promise<unknown> {
   return queryClient.invalidateQueries({ queryKey: ["budgets"] });
 }
+
+export const forecastQuery = (months: 1 | 2 | 3) =>
+  queryOptions({
+    queryKey: ["forecast", months],
+    queryFn: async () => unwrap(await api.GET("/api/forecast", { params: { query: { months } } })),
+  });
+
+export const goalsQuery = (includeArchived: boolean) =>
+  queryOptions({
+    queryKey: ["goals", "list", { includeArchived }],
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/savings-goals", { params: { query: { include_archived: includeArchived } } }),
+      ),
+  });
+
+export const goalQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["goals", "detail", id],
+    queryFn: async () =>
+      unwrap(await api.GET("/api/savings-goals/{goal_id}", { params: { path: { goal_id: id } } })),
+  });
+
+export const yearReportQuery = (year: number) =>
+  queryOptions({
+    queryKey: ["reports", "year", year],
+    queryFn: async () => unwrap(await api.GET("/api/reports/year", { params: { query: { year } } })),
+  });
+
+export const categoryReportQuery = (year: number, kind: "expense" | "income") =>
+  queryOptions({
+    queryKey: ["reports", "categories", year, kind],
+    queryFn: async () =>
+      unwrap(await api.GET("/api/reports/categories", { params: { query: { year, kind } } })),
+  });
+
+/** Goals that follow an account balance change with transactions, so the forecast moves too. */
+export function invalidateGoals(queryClient: QueryClient): Promise<unknown> {
+  return queryClient.invalidateQueries({ queryKey: ["goals"] });
+}

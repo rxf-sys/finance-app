@@ -108,8 +108,17 @@ export const importRunsQuery = (accountId: string) =>
 /** Everything derived from transactions: lists, balances, dashboard numbers and category counts. */
 export function invalidateLedger(queryClient: QueryClient): Promise<unknown> {
   return Promise.all(
-    ["transactions", "accounts", "dashboard", "categories", "imports", "budgets", "available"].map((key) =>
-      queryClient.invalidateQueries({ queryKey: [key] }),
-    ),
+    [
+      "transactions",
+      "accounts",
+      "dashboard",
+      "categories",
+      "imports",
+      "budgets",
+      "available",
+      "forecast",
+      "goals",
+      "reports",
+    ].map((key) => queryClient.invalidateQueries({ queryKey: [key] })),
   );
 }

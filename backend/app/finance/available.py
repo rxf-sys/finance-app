@@ -37,12 +37,17 @@ def end_of_month(day: date) -> date:
     return reporting.add_months(day.replace(day=1), 1) - timedelta(days=1)
 
 
-def available_to_spend(db: Session, member: MemberContext, today: date) -> Available:
-    balance = sum(
-        stats.balance_cents
+def spendable_stats(db: Session, member: MemberContext) -> list[reporting.AccountStats]:
+    """Accounts that count as spendable money: visible, not archived, giro or cash."""
+    return [
+        stats
         for stats in reporting.account_stats(db, member, include_archived=False)
         if stats.account.kind in SPENDABLE_KINDS
-    )
+    ]
+
+
+def available_to_spend(db: Session, member: MemberContext, today: date) -> Available:
+    balance = sum(stats.balance_cents for stats in spendable_stats(db, member))
     last_day = end_of_month(today)
     contracts = db.scalars(
         select(Contract)
