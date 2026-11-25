@@ -3,84 +3,85 @@
 /* Dark mode follows the system unless the user picked a theme (data-theme on <html>). */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Design tokens, see the plan: indigo-violet primary, copper accent, warm off-white. */
+/* Design tokens of Orynthia Finance: fir-green primary, copper only for small hints,
+   neutral off-white; no violet. Contrast pairs are documented in docs/design.md. */
 :root {
-  --background: #f7f6f2;
+  --background: #f6f6f2;
   --surface: #ffffff;
-  --surface-muted: #efede7;
-  --border: #ddd9cf;
-  --text: #1c1b19;
-  --text-muted: #5e5a52;
-  --primary: #4b3fbf;
-  --primary-hover: #3d32a3;
+  --surface-muted: #ecede7;
+  --border: #d8dad2;
+  --text: #1a1d1b;
+  --text-muted: #565c58;
+  --primary: #1e6b58;
+  --primary-hover: #175645;
   --on-primary: #ffffff;
   --accent: #a9501c;
   --positive: #1b7449;
   --negative: #c0392f;
   --warning: #8f5e00;
   --info: #2a64a3;
-  --chart-1: #4b3fbf;
+  --chart-1: #1e6b58;
   --chart-2: #a9501c;
-  --chart-3: #1b7449;
-  --chart-4: #2a64a3;
-  --chart-5: #a23b8c;
-  --chart-6: #7a6a1f;
-  --chart-7: #2b8a93;
-  --chart-8: #6b6b75;
+  --chart-3: #2a64a3;
+  --chart-4: #9a7a12;
+  --chart-5: #b0476e;
+  --chart-6: #23818c;
+  --chart-7: #7d5a3c;
+  --chart-8: #6b6f6c;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --background: #121118;
-    --surface: #1b1a22;
-    --surface-muted: #24232d;
-    --border: #34323f;
-    --text: #edebf5;
-    --text-muted: #a6a3b5;
-    --primary: #9d94ff;
-    --primary-hover: #b3acff;
-    --on-primary: #121118;
+    --background: #111413;
+    --surface: #191d1b;
+    --surface-muted: #222725;
+    --border: #313834;
+    --text: #eaeeeb;
+    --text-muted: #a2aaa5;
+    --primary: #5fc4a8;
+    --primary-hover: #80d3bb;
+    --on-primary: #0e1311;
     --accent: #f29a62;
     --positive: #4cc38a;
     --negative: #f2726a;
     --warning: #e7b44a;
     --info: #6aa6e8;
-    --chart-1: #9d94ff;
+    --chart-1: #5fc4a8;
     --chart-2: #f29a62;
-    --chart-3: #4cc38a;
-    --chart-4: #6aa6e8;
-    --chart-5: #e07bc8;
-    --chart-6: #d1be5a;
-    --chart-7: #5cc6cf;
-    --chart-8: #a6a3b5;
+    --chart-3: #6aa6e8;
+    --chart-4: #e2c25a;
+    --chart-5: #e98aa8;
+    --chart-6: #5cc6cf;
+    --chart-7: #c79a74;
+    --chart-8: #a3aba6;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --background: #121118;
-  --surface: #1b1a22;
-  --surface-muted: #24232d;
-  --border: #34323f;
-  --text: #edebf5;
-  --text-muted: #a6a3b5;
-  --primary: #9d94ff;
-  --primary-hover: #b3acff;
-  --on-primary: #121118;
+  --background: #111413;
+  --surface: #191d1b;
+  --surface-muted: #222725;
+  --border: #313834;
+  --text: #eaeeeb;
+  --text-muted: #a2aaa5;
+  --primary: #5fc4a8;
+  --primary-hover: #80d3bb;
+  --on-primary: #0e1311;
   --accent: #f29a62;
   --positive: #4cc38a;
   --negative: #f2726a;
   --warning: #e7b44a;
   --info: #6aa6e8;
-  --chart-1: #9d94ff;
+  --chart-1: #5fc4a8;
   --chart-2: #f29a62;
-  --chart-3: #4cc38a;
-  --chart-4: #6aa6e8;
-  --chart-5: #e07bc8;
-  --chart-6: #d1be5a;
-  --chart-7: #5cc6cf;
-  --chart-8: #a6a3b5;
+  --chart-3: #6aa6e8;
+  --chart-4: #e2c25a;
+  --chart-5: #e98aa8;
+  --chart-6: #5cc6cf;
+  --chart-7: #c79a74;
+  --chart-8: #a3aba6;
   color-scheme: dark;
 }
 

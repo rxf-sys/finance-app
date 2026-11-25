@@ -2,7 +2,7 @@
 // Plain JS on purpose: it is served as-is and must not depend on the app bundle.
 
 self.addEventListener("push", (event) => {
-  let title = "Finanzen";
+  let title = "Orynthia Finance";
   let body = "";
   let url = "/";
   if (event.data) {

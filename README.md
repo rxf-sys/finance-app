@@ -1,5 +1,7 @@
 # finance-app
 
+> **Status:** In development (phase 3 in code, not in production yet) · planned product name **Orynthia Finance** · **As of:** 2026-11-25 · Part of my [portfolio](https://portfolio.rxf-sys.de/#projects)
+
 Self-hosted household finance app: accounts, categories, contracts and budgets for one household with
 several members. Runs as a Docker Compose stack, published through Cloudflare Tunnel behind Cloudflare Access.
 
@@ -21,6 +23,8 @@ uv sync
 export FA_DB_PASSWORD=devpass FA_COOKIE_SECURE=false FA_ENCRYPTION_KEY="$(uv run python -m app.cli generate-key)"
 uv run alembic upgrade head
 uv run python -m app.cli create-owner --email you@example.com --name "Your Name" --household "Zuhause"
+# or, on an empty database: a fictional demo household (demo@example.org) for trying it out
+# uv run python -m app.cli seed-demo
 uv run uvicorn app.main:app --reload               # API on :8000, docs on /api/docs
 
 cd ../frontend
@@ -31,6 +35,9 @@ pnpm dev                                           # UI on http://localhost:5173
 ## Production
 
 See [docs/deployment.md](docs/deployment.md) for the Proxmox VM, Cloudflare Tunnel and Access setup.
+
+More documentation: [architecture](docs/architecture.md), [decisions (ADRs)](docs/adr/),
+[roadmap](docs/roadmap.md), [design and contrast](docs/design.md).
 
 ## Security model
 

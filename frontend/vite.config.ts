@@ -4,12 +4,13 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
 
-// Working name of the app; the final name is not decided yet. This is the single
-// place to change it: manifest, <title> and the iOS home screen title use it.
-const APP_NAME = "Finanzen";
-const THEME_COLOR = "#4b3fbf";
-// Light `--background` token from src/index.css.
-const BACKGROUND_COLOR = "#f7f6f2";
+// Product name (part of the Orynthia family). This is the single place to change it:
+// manifest, <title> and the iOS home screen title use it.
+const APP_NAME = "Orynthia Finance";
+const SHORT_NAME = "Finance";
+// Light `--primary` and `--background` tokens from src/index.css.
+const THEME_COLOR = "#1e6b58";
+const BACKGROUND_COLOR = "#f6f6f2";
 
 export default defineConfig({
   plugins: [
@@ -35,7 +36,7 @@ export default defineConfig({
       },
       manifest: {
         name: APP_NAME,
-        short_name: APP_NAME,
+        short_name: SHORT_NAME,
         description: "Haushaltsfinanzen: Konten, Verträge, Budgets",
         lang: "de",
         start_url: "/",

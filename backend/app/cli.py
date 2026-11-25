@@ -5,6 +5,7 @@ python -m app.cli reset-totp --email you@example.com
 python -m app.cli export-openapi > openapi.json
 python -m app.cli generate-key
 python -m app.cli generate-vapid-key > secrets/fa_vapid_private_key
+python -m app.cli seed-demo   # empty local database only, see app/demo.py
 """
 
 import argparse
@@ -87,6 +88,28 @@ def export_openapi() -> int:
     return 0
 
 
+def seed_demo(password_stdin: bool) -> int:
+    # Imported here: the demo pulls in the whole finance pipeline.
+    from app.demo import DEMO_EMAIL, DemoRefusedError
+    from app.demo import seed_demo as run_seed
+
+    password = sys.stdin.readline().rstrip("\n") if password_stdin else _read_new_password()
+    if len(password) < MIN_PASSWORD_LENGTH:
+        print(f"At least {MIN_PASSWORD_LENGTH} characters, please.", file=sys.stderr)
+        return 1
+    try:
+        with get_sessionmaker().begin() as db:
+            result = run_seed(db, password)
+    except DemoRefusedError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    print(
+        f"Demo household created: {result.transactions} bookings, "
+        f"{result.contracts} contracts. Login: {DEMO_EMAIL}"
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -104,6 +127,9 @@ def main(argv: list[str] | None = None) -> int:
 
     commands.add_parser("generate-vapid-key", help="Print a new VAPID private key (PEM) for Web Push")
 
+    demo = commands.add_parser("seed-demo", help="Fill an empty database with a fictional demo household")
+    demo.add_argument("--password-stdin", action="store_true", help="Read the demo password from stdin")
+
     args = parser.parse_args(argv)
     match args.command:
         case "create-owner":
@@ -118,6 +144,8 @@ def main(argv: list[str] | None = None) -> int:
         case "generate-vapid-key":
             sys.stdout.write(VapidKey.generate_pem())
             return 0
+        case "seed-demo":
+            return seed_demo(args.password_stdin)
     return 2
 
 

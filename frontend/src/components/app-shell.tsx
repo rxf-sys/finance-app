@@ -119,7 +119,7 @@ export function AppShell() {
     <ToastProvider>
       <div className="flex min-h-dvh">
         <aside className="hidden w-56 shrink-0 flex-col border-r border-border bg-surface p-4 md:flex">
-          <p className="px-2 text-lg font-semibold">Finanzen</p>
+          <p className="px-2 text-lg font-semibold">Orynthia Finance</p>
           <nav className="mt-6 flex flex-col gap-1" aria-label="Hauptnavigation">
             {SIDEBAR_NAV.map((item) => (
               <Link
