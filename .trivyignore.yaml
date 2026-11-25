@@ -1,0 +1,11 @@
+# Accepted Trivy findings. Every entry needs a path scope, a reason and an expiry date,
+# so the finding fails CI again once the date passes.
+vulnerabilities:
+  # golang.org/x/net/html DoS in the Caddy binary of the web image. caddy:2.11.9-alpine is the
+  # newest release and still ships x/net v0.60.0 (fixed in v0.62.0). Our Caddyfile only serves
+  # static files and proxies /api, so Caddy never parses HTML. Drop this once Renovate bumps Caddy.
+  - id: CVE-2026-78661
+    paths:
+      - usr/bin/caddy
+    expired_at: 2027-01-31
+    statement: x/net/html parser is not reachable with our Caddyfile; waiting for an upstream Caddy release.

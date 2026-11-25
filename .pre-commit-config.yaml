@@ -1,0 +1,21 @@
+# Install once with: pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: backend-ruff
+        name: ruff (format + lint)
+        entry: sh -c 'cd backend && uv run ruff format . && uv run ruff check --fix .'
+        language: system
+        files: ^backend/
+        pass_filenames: false
+      - id: frontend-biome
+        name: biome (format + lint)
+        entry: sh -c 'cd frontend && pnpm exec biome check --write .'
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+      - id: gitleaks
+        name: gitleaks
+        entry: gitleaks git --pre-commit --staged --redact
+        language: system
+        pass_filenames: false

@@ -1,0 +1,115 @@
+# Production stack. Copy .env.example to .env and create the files in ./secrets first,
+# see docs/deployment.md.
+name: finance-app
+
+x-app-env: &app-env
+  FA_ENV: production
+  FA_DB_HOST: db
+  FA_DB_NAME: finance
+  FA_DB_USER: finance
+  FA_PUBLIC_ORIGIN: ${FA_PUBLIC_ORIGIN:?set FA_PUBLIC_ORIGIN in .env}
+  FA_WEBAUTHN_RP_ID: ${FA_WEBAUTHN_RP_ID:?set FA_WEBAUTHN_RP_ID in .env}
+  FA_CF_ACCESS_ENABLED: "true"
+  FA_CF_ACCESS_TEAM_DOMAIN: ${FA_CF_ACCESS_TEAM_DOMAIN:?set FA_CF_ACCESS_TEAM_DOMAIN in .env}
+  FA_CF_ACCESS_AUD: ${FA_CF_ACCESS_AUD:?set FA_CF_ACCESS_AUD in .env}
+  FA_TRUST_CF_CONNECTING_IP: "true"
+
+x-app-secrets: &app-secrets
+  - fa_db_password
+  - fa_encryption_key
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: finance
+      POSTGRES_USER: finance
+      POSTGRES_PASSWORD_FILE: /run/secrets/fa_db_password
+    secrets: [fa_db_password]
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finance -d finance"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  api:
+    image: ghcr.io/rxf-sys/finance-app-api:${APP_VERSION:-latest}
+    build: ./backend
+    restart: unless-stopped
+    environment: *app-env
+    secrets: *app-secrets
+    depends_on:
+      db: { condition: service_healthy }
+    # edge: needs outbound access for the Cloudflare Access signing keys.
+    networks: [internal, edge]
+
+  worker:
+    image: ghcr.io/rxf-sys/finance-app-api:${APP_VERSION:-latest}
+    restart: unless-stopped
+    command: ["procrastinate", "--app=app.worker.app", "worker"]
+    environment: *app-env
+    secrets: *app-secrets
+    depends_on:
+      api: { condition: service_healthy } # api runs the migrations
+    networks: [internal, edge]
+    healthcheck:
+      test: ["CMD", "procrastinate", "--app=app.worker.app", "healthchecks"]
+      interval: 60s
+      timeout: 10s
+
+  web:
+    image: ghcr.io/rxf-sys/finance-app-web:${APP_VERSION:-latest}
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      api: { condition: service_healthy }
+    networks: [edge]
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.7
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN in .env}
+    depends_on:
+      web: { condition: service_healthy }
+    networks: [edge]
+
+  backup:
+    image: ghcr.io/rxf-sys/finance-app-backup:${APP_VERSION:-latest}
+    build: ./deploy/backup
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: finance
+      PGDATABASE: finance
+      PGPASSWORD_FILE: /run/secrets/fa_db_password
+      RESTIC_REPOSITORY: ${RESTIC_REPOSITORY:-/backups/restic}
+      RESTIC_PASSWORD_FILE: /run/secrets/restic_password
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-30 2 * * *}
+    secrets: [fa_db_password, restic_password]
+    volumes:
+      - ${BACKUP_DIR:-./backups}:/backups
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [internal, edge]
+
+secrets:
+  fa_db_password:
+    file: ./secrets/fa_db_password
+  fa_encryption_key:
+    file: ./secrets/fa_encryption_key
+  restic_password:
+    file: ./secrets/restic_password
+
+volumes:
+  pgdata:
+
+networks:
+  internal:
+    internal: true # no internet access: database traffic only
+  edge: {}
