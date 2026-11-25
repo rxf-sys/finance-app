@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.banking.client import BankAuthExpired, BankError, BankRateLimited, EnableBankingClient
 from app.banking.mapping import MappedTransaction, map_transaction, provider_dedupe_hash
 from app.config import Settings, get_settings
+from app.finance.contracts import detect_contracts, match_payments
 from app.finance.dedupe import compute_dedupe_hash
 from app.finance.normalize import normalize_text
 from app.finance.rules import apply_rules
@@ -117,11 +118,13 @@ def _existing(db: Session, account: Account, hashes: Sequence[str]) -> set[str]:
 
 
 def _after_ingest(db: Session, household_id: uuid.UUID, new_transactions: Sequence[Transaction]) -> None:
-    """Everything that runs on freshly fetched rows. Contract matching joins here later."""
+    """Everything that runs on freshly fetched rows, in the same order as a CSV import."""
     if not new_transactions:
         return
     apply_rules(db, household_id, new_transactions)
     detect_transfers(db, household_id, new_transactions)
+    match_payments(db, household_id, new_transactions)
+    detect_contracts(db, household_id, account_ids={t.account_id for t in new_transactions})
     db.flush()
 
 

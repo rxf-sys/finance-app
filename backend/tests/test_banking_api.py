@@ -24,6 +24,8 @@ from app.models import (
     AuditLog,
     BankConnection,
     BankConnectionStatus,
+    Contract,
+    ContractStatus,
     Notification,
     NotificationKind,
     SyncRun,
@@ -458,6 +460,24 @@ def test_sync_applies_rules_and_pairs_transfers(
     db.expire_all()
     synced = db.scalars(select(Transaction).where(Transaction.account_id == account.id)).one()
     assert synced.transfer_peer_id is not None
+
+
+def test_sync_detects_and_matches_contracts(
+    world: World, bank: FakeBank, db: Session, settings: Settings
+) -> None:
+    connection_id, account = _linked(world, bank, db)
+    stream = {"creditor": {"name": "Streamdienst"}, "remittance_information": ["Abo"]}
+    bank.transactions = [tx(f"s{day}", "12.99", day, **stream) for day in (62, 31)]
+    _sync(db, bank, settings, connection_id)
+    assert db.scalar(select(func.count()).select_from(Contract)) == 0
+
+    bank.transactions.append(tx("s1", "12.99", 1, **stream))
+    _sync(db, bank, settings, connection_id)
+    contract = db.scalars(select(Contract)).one()
+    assert (contract.account_id, contract.status) == (account.id, ContractStatus.DETECTED)
+    assert contract.expected_amount_cents == -1299
+    linked = db.scalars(select(Transaction).where(Transaction.contract_id == contract.id)).all()
+    assert len(linked) == 3
 
 
 def test_expired_session_marks_connection_and_notifies_once(
