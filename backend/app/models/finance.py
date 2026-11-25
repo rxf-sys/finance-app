@@ -65,7 +65,10 @@ class ImportStatus(enum.StrEnum):
 
 class Account(UUIDPrimaryKey, CreatedAt, Base):
     __tablename__ = "accounts"
-    __table_args__ = (UniqueConstraint("household_id", "iban"),)
+    __table_args__ = (
+        UniqueConstraint("household_id", "iban"),
+        UniqueConstraint("bank_connection_id", "provider_account_uid"),
+    )
 
     household_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("households.id", ondelete="CASCADE"), index=True
@@ -78,6 +81,11 @@ class Account(UUIDPrimaryKey, CreatedAt, Base):
     currency: Mapped[str] = mapped_column(String(3), default="EUR")
     opening_balance_cents: Mapped[int] = mapped_column(BigInteger, default=0)
     is_archived: Mapped[bool] = mapped_column(default=False)
+    # Set when the account is synced through a bank connection (Phase 2).
+    bank_connection_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("bank_connections.id", ondelete="SET NULL"), index=True
+    )
+    provider_account_uid: Mapped[str | None] = mapped_column(String(100))
 
 
 class Category(UUIDPrimaryKey, CreatedAt, Base):
@@ -207,6 +215,9 @@ class Transaction(UUIDPrimaryKey, CreatedAt, Base):
     )
     note: Mapped[str | None] = mapped_column(Text)
     import_run_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("import_runs.id", ondelete="SET NULL"))
+    contract_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("contracts.id", ondelete="SET NULL"), index=True
+    )
 
     account: Mapped[Account] = relationship()
     category: Mapped[Category | None] = relationship()
