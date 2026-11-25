@@ -33,6 +33,8 @@ from app.models.planning import (
     ContractStatus,
     Notification,
     NotificationKind,
+    SavingsContribution,
+    SavingsGoal,
     SyncRun,
     SyncStatus,
 )
@@ -68,6 +70,8 @@ __all__ = [
     "Notification",
     "NotificationKind",
     "RuleSource",
+    "SavingsContribution",
+    "SavingsGoal",
     "SyncRun",
     "SyncStatus",
     "Tag",

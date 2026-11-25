@@ -1,14 +1,23 @@
-"""Contracts, budgets, bank connections and in-app notifications (Phase 2)."""
+"""Contracts, budgets, bank connections, in-app notifications (Phase 2) and savings goals (Phase 3)."""
 
 import enum
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, Enum, ForeignKey, LargeBinary, String, Text, UniqueConstraint
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    Enum,
+    ForeignKey,
+    LargeBinary,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, CreatedAt, UUIDPrimaryKey
-from app.models.finance import Account, Category
+from app.models.finance import Account, AccountVisibility, Category
 
 
 def _pg_enum(enum_cls: type[enum.StrEnum], name: str) -> Enum:
@@ -195,3 +204,49 @@ class Notification(UUIDPrimaryKey, CreatedAt, Base):
     link: Mapped[str | None] = mapped_column(String(200))  # in-app path, e.g. "/contracts/<id>"
     dedupe_key: Mapped[str] = mapped_column(String(200))
     read_at: Mapped[datetime | None]
+
+
+class SavingsGoal(UUIDPrimaryKey, CreatedAt, Base):
+    """A savings target. Progress is the linked account's balance, or the sum of manual contributions.
+
+    Visible like an account (shared, or private to its owner) and never more widely than its account.
+    """
+
+    __tablename__ = "savings_goals"
+    __table_args__ = (CheckConstraint("target_cents > 0", name="target_positive"),)
+
+    household_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("households.id", ondelete="CASCADE"), index=True
+    )
+    owner_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    visibility: Mapped[AccountVisibility] = mapped_column(_pg_enum(AccountVisibility, "account_visibility"))
+    name: Mapped[str] = mapped_column(String(100))
+    target_cents: Mapped[int] = mapped_column(BigInteger)
+    target_date: Mapped[date | None]
+    # With an account, progress is that account's balance; contributions are then ignored.
+    account_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("accounts.id", ondelete="SET NULL"), index=True
+    )
+    icon: Mapped[str | None] = mapped_column(String(40))  # lucide icon name
+    color: Mapped[str | None] = mapped_column(String(20))  # palette token, e.g. "chart-3"
+    note: Mapped[str | None] = mapped_column(Text)
+    archived_at: Mapped[datetime | None]
+
+    account: Mapped[Account | None] = relationship()
+    contributions: Mapped[list["SavingsContribution"]] = relationship(
+        back_populates="goal", cascade="all, delete-orphan", order_by="SavingsContribution.booked_on"
+    )
+
+
+class SavingsContribution(UUIDPrimaryKey, CreatedAt, Base):
+    """A manual deposit (positive) or withdrawal (negative) for a goal without an account."""
+
+    __tablename__ = "savings_contributions"
+
+    goal_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("savings_goals.id", ondelete="CASCADE"), index=True)
+    amount_cents: Mapped[int] = mapped_column(BigInteger)
+    booked_on: Mapped[date]
+    note: Mapped[str | None] = mapped_column(String(200))
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+
+    goal: Mapped[SavingsGoal] = relationship(back_populates="contributions")
