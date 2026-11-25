@@ -7,7 +7,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from app.api import finance_schemas as schemas
-from app.api.common import conflict_on_duplicate
+from app.api.common import conflict_on_duplicate, ensure_name_free
 from app.deps import CurrentMember, DbDep, MemberContext
 from app.finance import reporting
 from app.finance.default_categories import seed_default_categories
@@ -25,6 +25,19 @@ def get_category(db: Session, member: MemberContext, category_id: uuid.UUID) -> 
     if category is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Category not found")
     return category
+
+
+def _ensure_name_free(
+    db: Session, member: MemberContext, parent_id: uuid.UUID | None, name: str, exclude_id: uuid.UUID | None
+) -> None:
+    """Names are unique per household and parent, ignoring case."""
+    query = select(Category.name).where(
+        Category.household_id == member.household.id,
+        Category.parent_id.is_(None) if parent_id is None else Category.parent_id == parent_id,
+    )
+    if exclude_id is not None:
+        query = query.where(Category.id != exclude_id)
+    ensure_name_free(db.scalars(query), name, DUPLICATE_NAME)
 
 
 def _list(db: Session, member: MemberContext) -> list[schemas.CategoryOut]:
@@ -81,6 +94,7 @@ def create_category(body: schemas.CategoryCreate, member: CurrentMember, db: DbD
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "A top-level category needs a kind")
         kind = body.kind
         color = body.color
+    _ensure_name_free(db, member, body.parent_id, body.name, None)
     category = Category(
         id=uuid.uuid4(),
         household_id=member.household.id,
@@ -114,6 +128,8 @@ def update_category(
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT, "The kind can only be changed on a top-level category"
         )
+    if body.name is not None:
+        _ensure_name_free(db, member, category.parent_id, body.name, category.id)
     with conflict_on_duplicate(db, DUPLICATE_NAME):
         if body.name is not None:
             category.name = body.name

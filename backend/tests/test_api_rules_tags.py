@@ -215,6 +215,18 @@ def test_tag_validation_and_conflicts(world: World) -> None:
     assert world.owner.patch(f"{TAGS}/{first['id']}", json={"name": "Urlaub"}).status_code == 200  # unchanged
 
 
+def test_tag_names_are_unique_ignoring_case(world: World) -> None:
+    first = world.owner.post(TAGS, json={"name": "Urlaub"}).json()
+    second = world.owner.post(TAGS, json={"name": "Auto"}).json()
+
+    assert world.owner.post(TAGS, json={"name": "urlaub"}).status_code == 409
+    assert world.member.post(TAGS, json={"name": "URLAUB"}).status_code == 409
+    assert world.owner.patch(f"{TAGS}/{second['id']}", json={"name": "uRLAUB"}).status_code == 409
+    renamed = world.owner.patch(f"{TAGS}/{first['id']}", json={"name": "urlaub"})  # only the case changes
+    assert renamed.status_code == 200 and renamed.json()["name"] == "urlaub"
+    assert world.owner.post(TAGS, json={"name": "Urlaub"}).status_code == 409
+
+
 def test_deleting_a_tag_detaches_it_from_transactions(world: World, db: Session) -> None:
     tag = world.owner.post(TAGS, json={"name": "Urlaub"}).json()
     tx = make_tx(db, make_account(db, world.owner_user), -100)
